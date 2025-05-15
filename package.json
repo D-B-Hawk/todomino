@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "solid-js": "^1.9.5"
+    "solid-js": "^1.9.5",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
