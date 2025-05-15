@@ -3,6 +3,6 @@ export type Todo = {
   description: string;
   createdAt: number;
   updatedAt: number;
-  completedAt: number;
+  completedAt?: number;
   dependsOn?: Todo["id"];
 };
