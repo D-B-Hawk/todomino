@@ -1,13 +1,33 @@
+import type { DOMElement } from "solid-js/jsx-runtime";
 import { TodoComp } from "./components/Todo";
 import { createFakeTodos } from "./helpers/createFakeTodos";
-import { For } from "solid-js";
+import { createSignal, For } from "solid-js";
+import { createTodo } from "./helpers/createTodo";
 
-const FAKE_TODOS = createFakeTodos(3);
+type FormEvent = SubmitEvent & {
+  currentTarget: HTMLFormElement;
+  target: DOMElement;
+};
 
 export function App() {
+  const [currentTodos, setCurrentTodos] = createSignal(createFakeTodos(3));
+  const [newTodo, setNewTodo] = createSignal("");
+  const [dependsOn, setDependsOn] = createSignal<string>();
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const todo = createTodo({
+      description: newTodo(),
+      dependsOn: dependsOn(),
+    });
+    setNewTodo("");
+    setDependsOn();
+    setCurrentTodos((curTodos) => [...curTodos, todo]);
+  }
+
   return (
-    <div class="flex flex-col items-center border border-red-500">
-      <For each={FAKE_TODOS}>
+    <div class="flex flex-col items-center">
+      <For each={currentTodos()}>
         {(todo) => (
           <TodoComp
             class="my-3"
@@ -18,6 +38,28 @@ export function App() {
           />
         )}
       </For>
+      <form
+        class="flex flex-col gap-3 items-center border border-red-500"
+        on:submit={handleSubmit}
+      >
+        <input
+          type="text"
+          placeholder="New TODO"
+          value={newTodo()}
+          on:change={(e) => setNewTodo(e.target.value)}
+          required
+        />
+        <select
+          on:change={(e) => setDependsOn(e.target.value)}
+          value={dependsOn()}
+        >
+          <option value=""></option>
+          <For each={currentTodos()}>
+            {(todo) => <option value={todo.id}>{todo.description}</option>}
+          </For>
+        </select>
+        <button>submit</button>
+      </form>
     </div>
   );
 }
