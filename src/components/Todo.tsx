@@ -1,4 +1,4 @@
-import type { Component } from "solid-js";
+import { Show, type Component } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import type { Todo } from "../types";
 import { truncateText } from "../helpers/truncateText";
@@ -29,6 +29,11 @@ export const TodoComp: Component<TodoProps> = (props) => {
       <div class="flex flex-1 items-center border border-purple-300">
         {props.todo.description}
       </div>
+      <Show when={props.todo.dependsOn}>
+        <span class="absolute bottom-1 left-1 text-gray-300">
+          Depends On:{truncateText(props.todo.dependsOn || "", 8)}
+        </span>
+      </Show>
     </div>
   );
 };
