@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import type { Todo } from "../types";
+import { truncateText } from "../helpers/truncateText";
 
 interface TodoProps {
   todo: Todo;
@@ -9,13 +10,15 @@ interface TodoProps {
 }
 
 export const TodoComp: Component<TodoProps> = (props) => {
+  const shortenedUUID = truncateText(props.todo.id, 8);
   return (
     <div
       class={twMerge(
-        "flex w-80 h-24 rounded-lg border border-blue-400",
+        "relative flex w-80 py-7 rounded-lg border border-blue-400",
         props.class
       )}
     >
+      <span class="absolute top-1 right-1 text-gray-300">{shortenedUUID}</span>
       <div class="flex items-center p-2 border border-red-300">
         <input
           type="checkbox"
