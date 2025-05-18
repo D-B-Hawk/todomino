@@ -3,14 +3,16 @@ import { twMerge } from "tailwind-merge";
 import type { Todo } from "../types";
 import { truncateText } from "../helpers/truncateText";
 
-interface TodoProps {
+export interface TodoProps {
   todo: Todo;
   onCheck: (checked: boolean) => void;
+  onShowDependentClick: (id: Todo["id"]) => void;
   class?: string;
 }
 
 export const TodoComp: Component<TodoProps> = (props) => {
   const shortenedUUID = truncateText(props.todo.id, 8);
+
   return (
     <div
       class={twMerge(
@@ -29,10 +31,27 @@ export const TodoComp: Component<TodoProps> = (props) => {
       <div class="flex flex-1 items-center border border-purple-300">
         {props.todo.description}
       </div>
-      <Show when={props.todo.dependsOn}>
-        <span class="absolute bottom-1 left-1 text-gray-300">
-          Depends On:{truncateText(props.todo.dependsOn || "", 8)}
-        </span>
+      <Show when={!!props.todo.dependent || !!props.todo.dependsOn}>
+        <div class="absolute flex w-full flex-col bottom-1 left-1 text-gray-300">
+          <Show when={props.todo.dependent}>
+            <div class="flex w-full justify-between border border-orange-300">
+              <span>
+                Dependent:{truncateText(props.todo.dependent || "", 8)}
+              </span>
+              <button
+                on:click={() => props.onShowDependentClick(props.todo.id)}
+                class="bg-green-400"
+              >
+                Show
+              </button>
+            </div>
+          </Show>
+          <Show when={props.todo.dependsOn}>
+            <span>
+              Depends On:{truncateText(props.todo.dependsOn || "", 8)}
+            </span>
+          </Show>
+        </div>
       </Show>
     </div>
   );

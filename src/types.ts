@@ -5,4 +5,5 @@ export type Todo = {
   updatedAt: number;
   completedAt?: number;
   dependsOn?: Todo["id"];
+  dependent?: Todo["id"];
 };
