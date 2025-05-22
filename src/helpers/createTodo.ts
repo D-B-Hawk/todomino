@@ -6,7 +6,7 @@ import type { Todo } from "../types";
 type TodoArgs = Pick<Todo, "description" | "dependsOn">;
 
 export function createTodo(
-  args: TodoArgs = { description: faker.lorem.sentence() }
+  args: TodoArgs = { description: faker.lorem.sentence() },
 ): Todo {
   return {
     id: uuid(),

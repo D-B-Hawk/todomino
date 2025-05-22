@@ -17,7 +17,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
     <div
       class={twMerge(
         "relative flex w-80 py-7 rounded-lg border border-blue-400",
-        props.class
+        props.class,
       )}
     >
       <span class="absolute top-1 right-1 text-gray-300">{shortenedUUID}</span>

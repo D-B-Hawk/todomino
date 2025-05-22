@@ -4,6 +4,7 @@ import { createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
 import type { Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
+import { noop } from "./helpers/noop";
 
 type FormEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
@@ -64,8 +65,7 @@ export function App() {
           todo: dependentTodo,
           class: "my-3",
           onShowDependentClick: handleShowDependent,
-          onCheck: (checked) =>
-            console.log("the input has been checked =>", checked),
+          onCheck: noop,
         },
         dependentProps: getDependentProps(dependentTodo.dependent),
         showDependent: showDependentsForTodo()[dependentTodo.id],
@@ -86,8 +86,7 @@ export function App() {
                   todo,
                   class: "my-3",
                   onShowDependentClick: handleShowDependent,
-                  onCheck: (checked) =>
-                    console.log("the input has been checked =>", checked),
+                  onCheck: noop,
                 }}
                 dependentProps={getDependentProps(todo.dependent)}
                 showDependent={showDependentsForTodo()[todo.id]}
