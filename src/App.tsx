@@ -1,10 +1,11 @@
+import { createEffect, createSignal, For } from "solid-js";
 import type { DOMElement } from "solid-js/jsx-runtime";
 import { createFakeTodos } from "./helpers/createFakeTodos";
-import { createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
 import type { Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { noop } from "./helpers/noop";
+import { useIdxDB } from "./hooks/useDB";
 
 type FormEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
@@ -18,6 +19,14 @@ export function App() {
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
+
+  const [, dbError] = useIdxDB();
+
+  createEffect(() => {
+    if (dbError()) {
+      console.error(dbError());
+    }
+  });
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
