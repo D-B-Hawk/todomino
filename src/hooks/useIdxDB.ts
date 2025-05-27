@@ -1,13 +1,14 @@
 import { createSignal, type Accessor } from "solid-js";
 
-export function useIdxDB<Item>(
-  dbName: string,
-): [
-  Accessor<IDBDatabase | undefined>,
+type UseIdxDBReturn<Item> = [
+  Accessor<Item[]>,
   Accessor<string | undefined>,
   { addItem: (item: Item) => void },
-] {
+];
+
+export function useIdxDB<Item>(dbName: string): UseIdxDBReturn<Item> {
   const [db, setDB] = createSignal<IDBDatabase>();
+  const [dbItems, setDBItems] = createSignal<Item[]>([]);
   const [dbError, setDBError] = createSignal<string>();
 
   const openDBRequest = window.indexedDB.open(dbName, 3);
@@ -24,24 +25,44 @@ export function useIdxDB<Item>(
 
   openDBRequest.onsuccess = () => {
     setDB(openDBRequest.result);
+    getAllItems();
   };
 
-  const addItem = (item: Item) => {
-    const currentDB = db();
-    if (!currentDB) {
-      setDBError("no db to speak of");
+  function createObjectStore() {
+    return db()?.transaction(dbName, "readwrite").objectStore(dbName);
+  }
+
+  function getAllItems() {
+    const objStore = createObjectStore();
+    if (!objStore) {
+      setDBError("no object store");
       return;
     }
 
-    const addRequest = currentDB
-      .transaction(dbName, "readwrite")
-      .objectStore(dbName)
-      .add(item);
+    const request = objStore.getAll();
+
+    request.onerror = () => {
+      setDBError(request.error?.message || "error getting all items");
+    };
+
+    request.onsuccess = () => {
+      setDBItems(request.result);
+    };
+  }
+
+  const addItem = (item: Item) => {
+    const objStore = createObjectStore();
+    if (!objStore) {
+      setDBError("no object store");
+      return;
+    }
+
+    const addRequest = objStore.add(item);
 
     addRequest.onerror = () => {
       setDBError(addRequest.error?.message || "error adding item");
     };
   };
 
-  return [db, dbError, { addItem }];
+  return [dbItems, dbError, { addItem }];
 }
