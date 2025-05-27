@@ -20,7 +20,7 @@ export function App() {
     Record<Todo["id"], boolean>
   >({});
 
-  const [, dbError] = useIdxDB();
+  const [, dbError, { addTodo }] = useIdxDB();
 
   createEffect(() => {
     if (dbError()) {
@@ -48,6 +48,7 @@ export function App() {
       ]);
     } else {
       setCurrentTodos((todos) => [...todos, todo]);
+      addTodo(todo);
     }
     setNewTodo("");
     setDependsOn();
