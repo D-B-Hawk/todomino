@@ -1,6 +1,5 @@
 import { createEffect, createSignal, For } from "solid-js";
 import type { DOMElement } from "solid-js/jsx-runtime";
-import { createFakeTodos } from "./helpers/createFakeTodos";
 import { createTodo } from "./helpers/createTodo";
 import type { Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
@@ -13,14 +12,13 @@ type FormEvent = SubmitEvent & {
 };
 
 export function App() {
-  const [currentTodos, setCurrentTodos] = createSignal(createFakeTodos(1));
   const [newTodo, setNewTodo] = createSignal("");
   const [dependsOn, setDependsOn] = createSignal<Todo["id"]>();
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
 
-  const [, dbError, { addItem }] = useIdxDB<Todo>("todos");
+  const [todos, { addItem, updateItem, dbError }] = useIdxDB<Todo>("todos");
 
   createEffect(() => {
     if (dbError()) {
@@ -36,19 +34,12 @@ export function App() {
       dependsOn: dependsOn(),
     });
 
-    const dependedOn = currentTodos().find((item) => item.id === dependsOn());
+    const dependedOn = todos().find((item) => item.id === dependsOn());
 
+    addItem(todo);
     if (dependedOn) {
-      const updatedMain = { ...dependedOn, dependent: todo.id };
-
-      setCurrentTodos((curTodos) => [
-        ...curTodos.filter((item) => item.id !== dependedOn.id),
-        updatedMain,
-        todo,
-      ]);
-    } else {
-      setCurrentTodos((todos) => [...todos, todo]);
-      addItem(todo);
+      const updatedTodo = { ...dependedOn, dependent: todo.id };
+      updateItem(updatedTodo);
     }
     setNewTodo("");
     setDependsOn();
@@ -61,13 +52,13 @@ export function App() {
     }));
   }
 
-  const mainTodos = () =>
-    currentTodos()
+  const independentTodos = () =>
+    todos()
       .filter((i) => !i.dependsOn)
       .sort((a, b) => a.createdAt - b.createdAt);
 
   const getDependentProps = (id?: Todo["id"]): TodoSetProps | undefined => {
-    const dependentTodo = currentTodos().find((i) => i.id === id);
+    const dependentTodo = todos().find((i) => i.id === id);
 
     if (dependentTodo) {
       return {
@@ -83,12 +74,12 @@ export function App() {
     }
   };
 
-  const availableOptions = () => currentTodos().filter((i) => !i.dependent);
+  const availableOptions = () => todos().filter((i) => !i.dependent);
 
   return (
     <div class="flex flex-col h-screen max-h-screen border-2 border-purple-500">
-      <div class="flex justify-center gap-2 border border-green-400">
-        <For each={mainTodos()}>
+      <div class="flex justify-center gap-2 border border-green-400 overflow-scroll">
+        <For each={independentTodos()}>
           {(todo) => (
             <div class="border border-red-300 p-2">
               <TodoSet
