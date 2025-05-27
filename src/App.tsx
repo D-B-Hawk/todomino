@@ -5,7 +5,7 @@ import { createTodo } from "./helpers/createTodo";
 import type { Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { noop } from "./helpers/noop";
-import { useIdxDB } from "./hooks/useDB";
+import { useIdxDB } from "./hooks/useIdxDB";
 
 type FormEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
@@ -20,7 +20,7 @@ export function App() {
     Record<Todo["id"], boolean>
   >({});
 
-  const [, dbError, { addTodo }] = useIdxDB();
+  const [, dbError, { addItem }] = useIdxDB<Todo>("todos");
 
   createEffect(() => {
     if (dbError()) {
@@ -48,7 +48,7 @@ export function App() {
       ]);
     } else {
       setCurrentTodos((todos) => [...todos, todo]);
-      addTodo(todo);
+      addItem(todo);
     }
     setNewTodo("");
     setDependsOn();
