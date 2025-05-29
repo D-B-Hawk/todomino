@@ -1,15 +1,9 @@
 import { createEffect, createSignal, For } from "solid-js";
-import type { DOMElement } from "solid-js/jsx-runtime";
 import { createTodo } from "./helpers/createTodo";
 import type { Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
-import { noop } from "./helpers/noop";
 import { useIdxDB } from "./hooks/useIdxDB";
-
-type FormEvent = SubmitEvent & {
-  currentTarget: HTMLFormElement;
-  target: DOMElement;
-};
+import { TodoForm } from "./components/TodoForm";
 
 export function App() {
   const [newTodo, setNewTodo] = createSignal("");
@@ -18,7 +12,8 @@ export function App() {
     Record<Todo["id"], boolean>
   >({});
 
-  const [todos, { addItem, updateItem, dbError }] = useIdxDB<Todo>("todos");
+  const [todos, { addItem, updateItem, dbError, reqError }] =
+    useIdxDB<Todo>("todos");
 
   createEffect(() => {
     if (dbError()) {
@@ -26,9 +21,13 @@ export function App() {
     }
   });
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  createEffect(() => {
+    if (reqError()) {
+      console.error(reqError());
+    }
+  });
 
+  function handleSubmit() {
     const todo = createTodo({
       description: newTodo(),
       dependsOn: dependsOn(),
@@ -37,10 +36,12 @@ export function App() {
     const dependedOn = todos().find((item) => item.id === dependsOn());
 
     addItem(todo);
+
     if (dependedOn) {
       const updatedTodo = { ...dependedOn, dependent: todo.id };
       updateItem(updatedTodo);
     }
+
     setNewTodo("");
     setDependsOn();
   }
@@ -50,6 +51,31 @@ export function App() {
       ...curShownDependents,
       [id]: !curShownDependents[id],
     }));
+  }
+
+  function handleCheck(checked: boolean, todo: Todo) {
+    const now = Date.now();
+    const completedAt = checked ? now : undefined;
+    const dependentTodo = todos().find((item) => item.id === todo.dependent);
+
+    const completedTodo = {
+      ...todo,
+      updatedAt: now,
+      completedAt,
+      dependent: undefined,
+    };
+
+    updateItem(completedTodo);
+
+    if (dependentTodo) {
+      const updatedDependent = {
+        ...dependentTodo,
+        updatedAt: now,
+        dependsOn: undefined,
+      };
+
+      updateItem(updatedDependent);
+    }
   }
 
   const independentTodos = () =>
@@ -66,7 +92,7 @@ export function App() {
           todo: dependentTodo,
           class: "my-3",
           onShowDependentClick: handleShowDependent,
-          onCheck: noop,
+          onCheck: (checked) => handleCheck(checked, dependentTodo),
         },
         dependentProps: getDependentProps(dependentTodo.dependent),
         showDependent: showDependentsForTodo()[dependentTodo.id],
@@ -87,7 +113,7 @@ export function App() {
                   todo,
                   class: "my-3",
                   onShowDependentClick: handleShowDependent,
-                  onCheck: noop,
+                  onCheck: (checked) => handleCheck(checked, todo),
                 }}
                 dependentProps={getDependentProps(todo.dependent)}
                 showDependent={showDependentsForTodo()[todo.id]}
@@ -96,25 +122,14 @@ export function App() {
           )}
         </For>
       </div>
-      <form class="flex flex-col gap-3 items-center" on:submit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="New TODO"
-          value={newTodo()}
-          on:change={(e) => setNewTodo(e.target.value)}
-          required
-        />
-        <select
-          on:change={(e) => setDependsOn(e.target.value)}
-          value={dependsOn()}
-        >
-          <option value=""></option>
-          <For each={availableOptions()}>
-            {(todo) => <option value={todo.id}>{todo.description}</option>}
-          </For>
-        </select>
-        <button>submit</button>
-      </form>
+      <TodoForm
+        newTodo={newTodo()}
+        dependsOn={dependsOn()}
+        onNewTodoChange={setNewTodo}
+        onDependsOnChange={setDependsOn}
+        dropDownOptions={availableOptions()}
+        onFormSubmit={handleSubmit}
+      />
     </div>
   );
 }
