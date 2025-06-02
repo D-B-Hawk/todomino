@@ -1,15 +1,12 @@
-import { For } from "solid-js";
-import type { Todo } from "../types";
 import type { DOMElement } from "solid-js/jsx-runtime";
+import { SelectInput, type Option, type SelectInputProps } from "./SelectInput";
 
-interface TodoFormProps {
+type TodoFormProps = {
   newTodo: string;
-  dependsOn: Todo["id"] | undefined;
   onNewTodoChange: (val: string) => void;
   onDependsOnChange: (val: string) => void;
-  dropDownOptions: Todo[];
   onFormSubmit?: () => void;
-}
+} & SelectInputProps<Option>;
 
 type FormEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
@@ -31,15 +28,10 @@ export function TodoForm(props: TodoFormProps) {
         on:change={(e) => props.onNewTodoChange(e.target.value)}
         required
       />
-      <select
-        on:change={(e) => props.onDependsOnChange(e.target.value)}
-        value={props.dependsOn}
-      >
-        <option value=""></option>
-        <For each={props.dropDownOptions}>
-          {(todo) => <option value={todo.id}>{todo.description}</option>}
-        </For>
-      </select>
+      <SelectInput
+        selectValue={props.selectValue}
+        selectOptions={props.selectOptions}
+      />
       <button>submit</button>
     </form>
   );
