@@ -8,12 +8,16 @@ import { TodoForm } from "./components/TodoForm";
 export function App() {
   const [newTodo, setNewTodo] = createSignal("");
   const [dependsOn, setDependsOn] = createSignal<Todo["id"]>();
+  const [showCompleted, setShowCompleted] = createSignal(true);
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
 
   const [todos, { addItem, updateItem, dbError, reqError }] =
     useIdxDB<Todo>("todos");
+
+  const displayedTodos = () =>
+    todos().filter((todo) => !!todo.completedAt === showCompleted());
 
   createEffect(() => {
     if (dbError()) {
@@ -79,7 +83,7 @@ export function App() {
   }
 
   const independentTodos = () =>
-    todos()
+    displayedTodos()
       .filter((i) => !i.dependsOn)
       .sort((a, b) => a.createdAt - b.createdAt);
 
@@ -100,7 +104,7 @@ export function App() {
     }
   };
 
-  const availableOptions = () => todos().filter((i) => !i.dependent);
+  const availableOptions = () => displayedTodos().filter((i) => !i.dependent);
 
   return (
     <div class="flex flex-col h-screen max-h-screen border-2 border-purple-500">
@@ -130,6 +134,12 @@ export function App() {
         dropDownOptions={availableOptions()}
         onFormSubmit={handleSubmit}
       />
+      <button
+        class="py-1 px-2 border rounded-md w-fit self-center "
+        onClick={() => setShowCompleted((complete) => !complete)}
+      >
+        {showCompleted() ? "Hide" : "Show"}
+      </button>
     </div>
   );
 }
