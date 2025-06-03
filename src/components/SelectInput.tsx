@@ -1,23 +1,20 @@
 import { For } from "solid-js";
 import type { JSX } from "solid-js/jsx-runtime";
+import { twMerge } from "tailwind-merge";
 
 export type Option = { id: string | number; value: string };
 
-export type SelectInputProps<O extends Option> = {
-  selectValue: JSX.SelectHTMLAttributes<HTMLSelectElement>["value"];
-  onSelectChange?: (value: string) => void;
-  selectOptions: O[];
-};
+export interface SelectInputProps
+  extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
+  options: Option[]; // for whatever reason options is not listed as an attribute in JSX.SelectHTMLAttributes
+  class?: string;
+}
 
-export function SelectInput<O extends Option>(props: SelectInputProps<O>) {
+export function SelectInput(props: SelectInputProps) {
   return (
-    <select
-      class="rounded-sm px-4 py-2"
-      on:change={(e) => props.onSelectChange?.(e.target.value)}
-      value={props.selectValue}
-    >
+    <select class={twMerge("rounded-sm px-4 py-2", props.class)} {...props}>
       <option value=""></option>
-      <For each={props.selectOptions}>
+      <For each={props.options}>
         {(option) => <option value={option.id}>{option.value}</option>}
       </For>
     </select>
