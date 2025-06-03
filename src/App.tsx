@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import type { Todo } from "./types";
+import { DEFAULT_LISTS, type List, type Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { useIdxDB } from "./hooks/useIdxDB";
 import { TodoForm } from "./components/TodoForm";
@@ -8,6 +8,7 @@ import { TodoForm } from "./components/TodoForm";
 export function App() {
   const [newTodo, setNewTodo] = createSignal("");
   const [dependsOn, setDependsOn] = createSignal<Todo["id"]>();
+  const [list, setList] = createSignal<List>("reminders");
   const [showCompleted, setShowCompleted] = createSignal(true);
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
@@ -17,7 +18,10 @@ export function App() {
     useIdxDB<Todo>("todos");
 
   const displayedTodos = () =>
-    todos().filter((todo) => !!todo.completedAt === showCompleted());
+    todos().filter(
+      (todo) =>
+        !!todo.completedAt === false || !!todo.completedAt === showCompleted(),
+    );
 
   createEffect(() => {
     if (dbError()) {
@@ -35,6 +39,7 @@ export function App() {
     const todo = createTodo({
       description: newTodo(),
       dependsOn: dependsOn(),
+      list: list(),
     });
 
     const dependedOn = todos().find((item) => item.id === dependsOn());
@@ -126,14 +131,30 @@ export function App() {
           )}
         </For>
       </div>
+
       <TodoForm
         newTodo={newTodo()}
-        dependsOn={dependsOn()}
+        dependentSelectProps={{
+          value: dependsOn(),
+          onChange: (e) => setDependsOn(e.target.value),
+          options: availableOptions().map((option) => ({
+            id: option.id,
+            value: option.description,
+          })),
+        }}
+        listSelectProps={{
+          value: list(),
+          onChange: (e) => setList(e.target.value),
+          options: DEFAULT_LISTS.map((item) => ({
+            id: item,
+            value: item,
+          })),
+        }}
         onNewTodoChange={setNewTodo}
         onDependsOnChange={setDependsOn}
-        dropDownOptions={availableOptions()}
         onFormSubmit={handleSubmit}
       />
+
       <button
         class="py-1 px-2 border rounded-md w-fit self-center "
         onClick={() => setShowCompleted((complete) => !complete)}
