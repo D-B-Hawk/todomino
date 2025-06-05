@@ -17,6 +17,7 @@
     "test:browser": "vitest --project browser"
   },
   "dependencies": {
+    "dexie": "^4.0.11",
     "solid-js": "^1.9.5",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0"
@@ -41,8 +42,8 @@
     "vitest": "^3.1.4"
   },
   "lint-staged": {
-    "*": [
-      "npm run lint",
+    "**/*.{ts,tsx}": [
+      "eslint",
       "prettier --write --ignore-unknown"
     ]
   },

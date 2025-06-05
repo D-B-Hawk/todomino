@@ -1,7 +1,6 @@
-export const DEFAULT_LISTS = ["reminders", "today", "completed"] as const;
-type DefaultList = (typeof DEFAULT_LISTS)[number];
+import type { INIT_LIST } from "./constants";
 
-export type List = DefaultList | (string & {});
+export type List = (typeof INIT_LIST)[number] | (string & {});
 
 export type Todo = {
   id: string;
