@@ -9,7 +9,7 @@ export function useDexie() {
   const [error, setError] = createSignal<Error>();
 
   const listsObservable = liveQuery(async () =>
-    (await db.lists.where({}).toArray()).map((item) => item.name),
+    (await db.lists.toArray()).map((item) => item.name),
   );
 
   const todosObservable = liveQuery(() => db.todos.toArray());
@@ -20,7 +20,7 @@ export function useDexie() {
   async function addTodo(todo: Todo) {
     const { dependsOnTodo } = await getDependents(todo);
 
-    db.transaction("rw", db.todos, async () => {
+    return db.transaction("rw", db.todos, async () => {
       await db.todos.put(todo);
       if (dependsOnTodo) {
         await db.todos.put({
@@ -29,8 +29,6 @@ export function useDexie() {
           updatedAt: Date.now(),
         });
       }
-    }).catch((error) => {
-      setError(getError(error, "error creating todo"));
     });
   }
 
