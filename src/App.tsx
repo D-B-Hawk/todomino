@@ -1,21 +1,18 @@
 import { createEffect, createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import { DEFAULT_LISTS, type List, type Todo } from "./types";
+import { type FormSubmitEvent, type Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
-import { useIdxDB } from "./hooks/useIdxDB";
+import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
+import { TODO_FORM_SCHEMA } from "./constants";
 
 export function App() {
-  const [newTodo, setNewTodo] = createSignal("");
-  const [dependsOn, setDependsOn] = createSignal<Todo["id"]>();
-  const [list, setList] = createSignal<List>("reminders");
   const [showCompleted, setShowCompleted] = createSignal(true);
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
 
-  const [todos, { addItem, updateItem, dbError, reqError }] =
-    useIdxDB<Todo>("todos");
+  const [lists, todos, { addTodo, error, handleTodoCheck }] = useDexie();
 
   const displayedTodos = () =>
     todos().filter(
@@ -24,67 +21,16 @@ export function App() {
     );
 
   createEffect(() => {
-    if (dbError()) {
-      console.error(dbError());
+    if (error()) {
+      console.error("an error", error());
     }
   });
-
-  createEffect(() => {
-    if (reqError()) {
-      console.error(reqError());
-    }
-  });
-
-  function handleSubmit() {
-    const todo = createTodo({
-      description: newTodo(),
-      dependsOn: dependsOn(),
-      list: list(),
-    });
-
-    const dependedOn = todos().find((item) => item.id === dependsOn());
-
-    addItem(todo);
-
-    if (dependedOn) {
-      const updatedTodo = { ...dependedOn, dependent: todo.id };
-      updateItem(updatedTodo);
-    }
-
-    setNewTodo("");
-    setDependsOn();
-  }
 
   function handleShowDependent(id: Todo["id"]) {
     setShowDependentsForTodo((curShownDependents) => ({
       ...curShownDependents,
       [id]: !curShownDependents[id],
     }));
-  }
-
-  function handleCheck(checked: boolean, todo: Todo) {
-    const now = Date.now();
-    const completedAt = checked ? now : undefined;
-    const dependentTodo = todos().find((item) => item.id === todo.dependent);
-
-    const completedTodo = {
-      ...todo,
-      updatedAt: now,
-      completedAt,
-      dependent: undefined,
-    };
-
-    updateItem(completedTodo);
-
-    if (dependentTodo) {
-      const updatedDependent = {
-        ...dependentTodo,
-        updatedAt: now,
-        dependsOn: undefined,
-      };
-
-      updateItem(updatedDependent);
-    }
   }
 
   const independentTodos = () =>
@@ -101,13 +47,33 @@ export function App() {
           todo: dependentTodo,
           class: "my-3",
           onShowDependentClick: handleShowDependent,
-          onCheck: (checked) => handleCheck(checked, dependentTodo),
+          onCheck: (checked) => handleTodoCheck(checked, dependentTodo),
         },
         dependentProps: getDependentProps(dependentTodo.dependent),
         showDependent: showDependentsForTodo()[dependentTodo.id],
       };
     }
   };
+
+  function handleFormSubmit(event: FormSubmitEvent) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const res = TODO_FORM_SCHEMA.safeParse(data);
+    if (!res.success) {
+      console.error(res.error);
+      return;
+    }
+
+    const todo = createTodo(res.data);
+
+    addTodo(todo)
+      .then(() => form.reset())
+      .catch((error) => console.error("error adding todo =>", error));
+  }
 
   const availableOptions = () => displayedTodos().filter((i) => !i.dependent);
 
@@ -122,7 +88,7 @@ export function App() {
                   todo,
                   class: "my-3",
                   onShowDependentClick: handleShowDependent,
-                  onCheck: (checked) => handleCheck(checked, todo),
+                  onCheck: (checked) => handleTodoCheck(checked, todo),
                 }}
                 dependentProps={getDependentProps(todo.dependent)}
                 showDependent={showDependentsForTodo()[todo.id]}
@@ -133,26 +99,21 @@ export function App() {
       </div>
 
       <TodoForm
-        newTodo={newTodo()}
+        onSubmit={handleFormSubmit}
         dependentSelectProps={{
-          value: dependsOn(),
-          onChange: (e) => setDependsOn(e.target.value),
+          name: "dependsOn",
           options: availableOptions().map((option) => ({
             id: option.id,
             value: option.description,
           })),
         }}
         listSelectProps={{
-          value: list(),
-          onChange: (e) => setList(e.target.value),
-          options: DEFAULT_LISTS.map((item) => ({
+          name: "list",
+          options: lists().map((item) => ({
             id: item,
             value: item,
           })),
         }}
-        onNewTodoChange={setNewTodo}
-        onDependsOnChange={setDependsOn}
-        onFormSubmit={handleSubmit}
       />
 
       <button
