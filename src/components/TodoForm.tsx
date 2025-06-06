@@ -1,38 +1,29 @@
-import type { DOMElement } from "solid-js/jsx-runtime";
+import { splitProps } from "solid-js";
+import type { JSX } from "solid-js/jsx-runtime";
 import { SelectInput, type SelectInputProps } from "./SelectInput";
+import { twMerge } from "tailwind-merge";
 
-type TodoFormProps = {
-  newTodo: string;
-  onNewTodoChange: (val: string) => void;
-  onDependsOnChange: (val: string) => void;
-  onFormSubmit?: () => void;
-} & {
+interface TodoFormProps extends JSX.HTMLAttributes<HTMLFormElement> {
   listSelectProps: SelectInputProps;
   dependentSelectProps: SelectInputProps;
-};
-
-type FormEvent = SubmitEvent & {
-  currentTarget: HTMLFormElement;
-  target: DOMElement;
-};
+  class?: string;
+}
 
 export function TodoForm(props: TodoFormProps) {
-  function handleFormSubmit(event: FormEvent) {
-    event.preventDefault();
-    props.onFormSubmit?.();
-  }
+  const [local, formProps] = splitProps(props, [
+    "listSelectProps",
+    "dependentSelectProps",
+    "class",
+  ]);
 
   return (
-    <form class="flex flex-col gap-3 items-center" on:submit={handleFormSubmit}>
-      <input
-        type="text"
-        placeholder="New TODO"
-        value={props.newTodo}
-        on:change={(e) => props.onNewTodoChange(e.target.value)}
-        required
-      />
-      <SelectInput {...props.listSelectProps} />
-      <SelectInput {...props.dependentSelectProps} />
+    <form
+      class={twMerge("flex flex-col gap-3 items-center", local.class)}
+      {...formProps}
+    >
+      <input type="text" name="description" placeholder="New TODO" required />
+      <SelectInput {...local.listSelectProps} />
+      <SelectInput {...local.dependentSelectProps} />
       <button>submit</button>
     </form>
   );
