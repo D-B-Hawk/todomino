@@ -9,7 +9,7 @@ export function useDexie() {
   const [error, setError] = createSignal<Error>();
 
   const listsObservable = liveQuery(async () =>
-    (await db.lists.toArray()).map((item) => item.name),
+    (await db.lists.where({}).toArray()).map((item) => item.name),
   );
 
   const todosObservable = liveQuery(() => db.todos.toArray());
@@ -34,6 +34,35 @@ export function useDexie() {
     });
   }
 
+  async function handleTodoCheck(checked: boolean, todo: Todo) {
+    const { dependentTodo, dependsOnTodo } = await getDependents(todo);
+    const now = Date.now();
+    const completedAt = checked ? now : undefined;
+
+    db.transaction("rw", db.todos, async () => {
+      db.todos.update(todo.id, {
+        updatedAt: now,
+        dependent: undefined,
+        dependsOn: undefined,
+        completedAt,
+      });
+      if (dependsOnTodo) {
+        await db.todos.update(dependsOnTodo, {
+          updatedAt: now,
+          dependent: undefined,
+        });
+      }
+      if (dependentTodo) {
+        await db.todos.update(dependentTodo, {
+          updatedAt: now,
+          dependsOn: undefined,
+        });
+      }
+    }).catch((error) => {
+      setError(getError(error, "error updating checked todo"));
+    });
+  }
+
   async function getDependents(todo: Todo) {
     // defaulting dependent and depends on to a string as bulkGet is looking for a string
     const { dependent = "", dependsOn = "" } = todo;
@@ -48,5 +77,5 @@ export function useDexie() {
     };
   }
 
-  return [lists, todos, { error, addTodo }] as const;
+  return [lists, todos, { error, addTodo, handleTodoCheck }] as const;
 }
