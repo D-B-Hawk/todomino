@@ -1,13 +1,9 @@
-import { db } from "../db";
 import { liveQuery } from "dexie";
+import { db } from "../db";
 import { useObservable } from "./useObservable";
-import type { Todo } from "../types";
-import { createSignal } from "solid-js";
-import { getError } from "../helpers/getError";
+import type { List, Todo } from "../types";
 
 export function useDexie() {
-  const [error, setError] = createSignal<Error>();
-
   const listsObservable = liveQuery(async () =>
     (await db.lists.toArray()).map((item) => item.name),
   );
@@ -16,6 +12,10 @@ export function useDexie() {
 
   const lists = useObservable(listsObservable, []);
   const todos = useObservable(todosObservable, []);
+
+  function addList(list: List) {
+    return db.lists.add({ name: list });
+  }
 
   async function addTodo(todo: Todo) {
     const { dependsOnTodo } = await getDependents(todo);
@@ -37,7 +37,7 @@ export function useDexie() {
     const now = Date.now();
     const completedAt = checked ? now : undefined;
 
-    db.transaction("rw", db.todos, async () => {
+    return db.transaction("rw", db.todos, async () => {
       db.todos.update(todo.id, {
         updatedAt: now,
         dependent: undefined,
@@ -56,8 +56,6 @@ export function useDexie() {
           dependsOn: undefined,
         });
       }
-    }).catch((error) => {
-      setError(getError(error, "error updating checked todo"));
     });
   }
 
@@ -75,5 +73,5 @@ export function useDexie() {
     };
   }
 
-  return [lists, todos, { error, addTodo, handleTodoCheck }] as const;
+  return [lists, todos, { addTodo, handleTodoCheck, addList }] as const;
 }

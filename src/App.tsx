@@ -1,30 +1,18 @@
-import { createEffect, createSignal, For } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
 import { type FormSubmitEvent, type Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
-import { TODO_FORM_SCHEMA } from "./constants";
+import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
+import { getFormData } from "./helpers/getFormData";
 
 export function App() {
-  const [showCompleted, setShowCompleted] = createSignal(true);
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
 
-  const [lists, todos, { addTodo, error, handleTodoCheck }] = useDexie();
-
-  const displayedTodos = () =>
-    todos().filter(
-      (todo) =>
-        !!todo.completedAt === false || !!todo.completedAt === showCompleted(),
-    );
-
-  createEffect(() => {
-    if (error()) {
-      console.error("an error", error());
-    }
-  });
+  const [lists, todos, { addTodo, handleTodoCheck, addList }] = useDexie();
 
   function handleShowDependent(id: Todo["id"]) {
     setShowDependentsForTodo((curShownDependents) => ({
@@ -34,7 +22,7 @@ export function App() {
   }
 
   const independentTodos = () =>
-    displayedTodos()
+    todos()
       .filter((i) => !i.dependsOn)
       .sort((a, b) => a.createdAt - b.createdAt);
 
@@ -59,8 +47,7 @@ export function App() {
     event.preventDefault();
 
     const form = event.currentTarget;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+    const data = getFormData(form);
 
     const res = TODO_FORM_SCHEMA.safeParse(data);
     if (!res.success) {
@@ -75,11 +62,47 @@ export function App() {
       .catch((error) => console.error("error adding todo =>", error));
   }
 
-  const availableOptions = () => displayedTodos().filter((i) => !i.dependent);
+  function handleListFormSubmit(event: FormSubmitEvent) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = getFormData(form);
+
+    const parsed = LIST_FORM_SCHEMA.safeParse(data);
+    if (parsed.success) {
+      addList(parsed.data.listName)
+        .then(() => form.reset())
+        .catch((error) => console.error(error));
+    }
+  }
+
+  const availableOptions = () => todos().filter((i) => !i.dependent);
 
   return (
-    <div class="flex flex-col h-screen max-h-screen border-2 border-purple-500">
-      <div class="flex justify-center gap-2 border border-green-400 overflow-scroll">
+    <div class="flex h-screen max-h-screen">
+      {/* Lists */}
+      <div class="flex flex-col items-center justify-center gap-3 w-80 border-2 border-orange-400">
+        <div class="flex flex-wrap gap-2">
+          <For each={lists()}>
+            {(list) => (
+              <div class="flex items-center justify-center border-2 border-gray-300 rounded-md p-4">
+                {list}
+              </div>
+            )}
+          </For>
+        </div>
+        <div class="flex flex-col border-2 items-center border-purple-300">
+          <h2>Add List</h2>
+          <form
+            class="flex flex-col gap-3 border border-blue-700 p-3 rounded-md"
+            onSubmit={handleListFormSubmit}
+          >
+            <input name="listName" type="text" />
+            <button class="bg-blue-400 p-3 rounded-md">ADD</button>
+          </form>
+        </div>
+      </div>
+      {/* Content */}
+      <div class="flex flex-1 gap-2 border border-green-400">
         <For each={independentTodos()}>
           {(todo) => (
             <div class="border border-red-300 p-2">
@@ -96,32 +119,27 @@ export function App() {
             </div>
           )}
         </For>
+        {/* todo form */}
+        <div class="flex border-2 border-lime-200">
+          <TodoForm
+            onSubmit={handleFormSubmit}
+            dependentSelectProps={{
+              name: "dependsOn",
+              options: availableOptions().map((option) => ({
+                id: option.id,
+                value: option.description,
+              })),
+            }}
+            listSelectProps={{
+              name: "list",
+              options: lists().map((item) => ({
+                id: item,
+                value: item,
+              })),
+            }}
+          />
+        </div>
       </div>
-
-      <TodoForm
-        onSubmit={handleFormSubmit}
-        dependentSelectProps={{
-          name: "dependsOn",
-          options: availableOptions().map((option) => ({
-            id: option.id,
-            value: option.description,
-          })),
-        }}
-        listSelectProps={{
-          name: "list",
-          options: lists().map((item) => ({
-            id: item,
-            value: item,
-          })),
-        }}
-      />
-
-      <button
-        class="py-1 px-2 border rounded-md w-fit self-center "
-        onClick={() => setShowCompleted((complete) => !complete)}
-      >
-        {showCompleted() ? "Hide" : "Show"}
-      </button>
     </div>
   );
 }
