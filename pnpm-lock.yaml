@@ -24,6 +24,9 @@ importers:
         specifier: ^3.25.55
         version: 3.25.56
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.28.0
+        version: 9.28.0
       '@faker-js/faker':
         specifier: ^9.8.0
         version: 9.8.0
