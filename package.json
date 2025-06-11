@@ -48,8 +48,5 @@
       "eslint",
       "prettier --write --ignore-unknown"
     ]
-  },
-  "volta": {
-    "node": "22.15.0"
   }
 }

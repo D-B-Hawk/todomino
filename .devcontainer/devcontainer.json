@@ -1,0 +1,10 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "mounts": ["source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind"],
+
+  "forwardPorts": [5173],
+
+  "postCreateCommand": "pnpm i"
+}
