@@ -1,14 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
 import type { List, Todo } from "./types";
-import { INIT_LIST } from "./constants";
-
-interface ListItem {
-  name: List;
-}
+import { INIT_LIST_NAMES } from "./constants";
+import { createList } from "./helpers/createList";
 
 export const db = new Dexie("TodosDB") as Dexie & {
   todos: EntityTable<Todo, "id">;
-  lists: EntityTable<ListItem, "name">;
+  lists: EntityTable<List, "name">;
 };
 
 // Schema declaration:
@@ -28,7 +25,7 @@ db.version(1).stores({
 db.on("populate", function (transaction) {
   transaction
     .table("lists")
-    .bulkAdd([...INIT_LIST].map((list) => ({ name: list })))
+    .bulkAdd([...INIT_LIST_NAMES].map((list) => createList({ name: list })))
     // eslint-disable-next-line no-console -- i want to know when this happens
     .then(() => console.log("initialized table with known lists"))
     .catch((error) =>
