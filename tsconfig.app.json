@@ -22,7 +22,9 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "types": ["vite-plugin-solid-svg/types-component-solid", "vite/client"]
   },
+
   "include": ["src"]
 }
