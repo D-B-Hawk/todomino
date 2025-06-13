@@ -1,20 +1,20 @@
 import { liveQuery } from "dexie";
 import { db } from "../db";
 import { useObservable } from "./useObservable";
-import type { List, Todo } from "../types";
+import type { ListName, Todo } from "../types";
+import { createList } from "../helpers/createList";
 
 export function useDexie() {
-  const listsObservable = liveQuery(async () =>
-    (await db.lists.toArray()).map((item) => item.name),
-  );
+  const listsObservable = liveQuery(() => db.lists.toArray());
 
   const todosObservable = liveQuery(() => db.todos.toArray());
 
   const lists = useObservable(listsObservable, []);
   const todos = useObservable(todosObservable, []);
 
-  function addList(list: List) {
-    return db.lists.add({ name: list });
+  function addList(listName: ListName) {
+    const newList = createList({ name: listName });
+    return db.lists.add(newList);
   }
 
   async function addTodo(todo: Todo) {
