@@ -1,13 +1,15 @@
 import { createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import { type FormSubmitEvent, type Todo } from "./types";
+import { type FormSubmitEvent, type ListName, type Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
 import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
+import { ListSelector } from "./components/ListSelector";
 
 export function App() {
+  const [selectedList, setSelectedList] = createSignal<ListName>("reminders");
   const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
     Record<Todo["id"], boolean>
   >({});
@@ -84,9 +86,12 @@ export function App() {
         <div class="flex flex-wrap gap-2">
           <For each={lists()}>
             {(list) => (
-              <div class="flex items-center justify-center border-2 border-gray-300 rounded-md p-4">
-                {list}
-              </div>
+              <ListSelector
+                list={list}
+                count={2}
+                selected={selectedList() === list.name}
+                onClick={() => setSelectedList(list.name)}
+              />
             )}
           </For>
         </div>
@@ -133,8 +138,8 @@ export function App() {
             listSelectProps={{
               name: "list",
               options: lists().map((item) => ({
-                id: item,
-                value: item,
+                id: item.name,
+                value: item.name,
               })),
             }}
           />
