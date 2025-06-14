@@ -1,6 +1,6 @@
 import { createSignal, For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import { type FormSubmitEvent, type ListName, type Todo } from "./types";
+import type { FormSubmitEvent, ListName, Todo } from "./types";
 import { TodoSet, type TodoSetProps } from "./components/TodoSet";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
@@ -14,7 +14,7 @@ export function App() {
     Record<Todo["id"], boolean>
   >({});
 
-  const [lists, todos, { addTodo, handleTodoCheck, addList }] = useDexie();
+  const [listsCount, todos, { addTodo, handleTodoCheck, addList }] = useDexie();
 
   function handleShowDependent(id: Todo["id"]) {
     setShowDependentsForTodo((curShownDependents) => ({
@@ -84,11 +84,11 @@ export function App() {
       {/* Lists */}
       <div class="flex flex-col items-center justify-center gap-3 w-80 border-2 border-orange-400">
         <div class="flex flex-wrap gap-2">
-          <For each={lists()}>
-            {(list) => (
+          <For each={listsCount()}>
+            {({ list, todoCount }) => (
               <ListSelector
                 list={list}
-                count={2}
+                todoCount={todoCount}
                 selected={selectedList() === list.name}
                 onClick={() => setSelectedList(list.name)}
               />
@@ -137,9 +137,9 @@ export function App() {
             }}
             listSelectProps={{
               name: "list",
-              options: lists().map((item) => ({
-                id: item.name,
-                value: item.name,
+              options: listsCount().map(({ list }) => ({
+                id: list.name,
+                value: list.name,
               })),
             }}
           />

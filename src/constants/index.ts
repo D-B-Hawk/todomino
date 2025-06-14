@@ -18,6 +18,8 @@ import TrelloIcon from "../assets/trello.svg";
 import TvIcon from "../assets/tv.svg";
 import YouTubeIcon from "../assets/youtube.svg";
 import ZapIcon from "../assets/zap.svg";
+import { createList } from "../helpers/createList";
+import type { TodoLists } from "../types";
 
 export enum IconKey {
   BOX = "box",
@@ -80,3 +82,9 @@ export const LIST_FORM_SCHEMA = z.object({
   icon: z.enum(IconKey),
   color: z.string().regex(HEX_COLOR_REGEX),
 });
+
+export const INIT_TODO_LISTS: TodoLists = {
+  completed: { ...createList({ name: "completed" }), todos: [] },
+  reminders: { ...createList({ name: "reminders" }), todos: [] },
+  today: { ...createList({ name: "today" }), todos: [] },
+};
