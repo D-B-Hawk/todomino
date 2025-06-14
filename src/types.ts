@@ -26,3 +26,14 @@ export type Todo = {
   dependent?: Todo["id"];
   list: ListName;
 };
+
+export type TodoList = List & {
+  todos: Todo[];
+};
+
+export type TodoLists = Record<ListName, TodoList>;
+
+export type ListCount = {
+  list: List;
+  todoCount: number;
+};

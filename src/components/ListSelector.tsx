@@ -1,12 +1,13 @@
-import type { JSX } from "solid-js/jsx-runtime";
-import type { List } from "../types";
-import { splitProps } from "solid-js";
+import { splitProps, type JSX } from "solid-js";
+import { twMerge } from "tailwind-merge";
+
 import { ICON_MAP } from "../constants";
+import type { List } from "../types";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   list: List;
-  count: number;
+  todoCount: number;
   selected?: boolean;
   class?: string;
 }
@@ -14,26 +15,31 @@ interface ListSelectorProps
 export function ListSelector(props: ListSelectorProps) {
   const [localProps, buttonProps] = splitProps(props, [
     "list",
-    "count",
+    "todoCount",
     "selected",
+    "class",
   ]);
+
   const Icon = ICON_MAP[localProps.list.icon];
 
   return (
     <button
-      classList={{
-        "bg-opacity-100": localProps.selected,
-        "bg-opacity-30": !localProps.selected,
-      }}
-      class="flex flex-col gap-1 items-start min-w-[150px] p-2 rounded-md bg-gray-400"
+      class={twMerge(
+        "flex flex-col gap-1 items-start min-w-[150px] p-2 rounded-md",
+        localProps.selected ? "bg-gray-500" : "bg-gray-200",
+        localProps.class,
+      )}
       {...buttonProps}
     >
       <div class="flex justify-between items-center w-full">
-        <div class={`bg-[${localProps.list.color}] p-1 rounded-full`}>
+        <div
+          style={{ "background-color": localProps.list.color }}
+          class="p-1 rounded-full border border-white"
+        >
           <Icon class="stroke-white" />
         </div>
 
-        <b>{localProps.count}</b>
+        <b>{localProps.todoCount}</b>
       </div>
       <b class="text-md font-semibold">{localProps.list.name}</b>
     </button>

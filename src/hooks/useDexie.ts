@@ -1,11 +1,23 @@
 import { liveQuery } from "dexie";
 import { db } from "../db";
 import { useObservable } from "./useObservable";
-import type { ListName, Todo } from "../types";
+import type { ListName, Todo, ListCount } from "../types";
 import { createList } from "../helpers/createList";
 
 export function useDexie() {
-  const listsObservable = liveQuery(() => db.lists.toArray());
+  const listsObservable = liveQuery(() =>
+    db.transaction("r", db.lists, db.todos, async () => {
+      const listsCount: ListCount[] = [];
+      const lists = await db.lists.toArray();
+      lists.forEach(async (list) => {
+        listsCount.push({
+          list,
+          todoCount: await db.todos.where("list").equals(list.name).count(),
+        });
+      });
+      return listsCount;
+    }),
+  );
 
   const todosObservable = liveQuery(() => db.todos.toArray());
 
