@@ -1,0 +1,9 @@
+.devcontainer
+.husky
+node_modules
+public
+.dockerignore
+.gitignore
+eslint.config.js
+Dockerfile
+README.md
