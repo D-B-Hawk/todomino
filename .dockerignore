@@ -1,11 +1,9 @@
 .devcontainer
 .husky
-.pnpm-store
 node_modules
 public
 .dockerignore
 .gitignore
-.npmrc
 eslint.config.js
 Dockerfile
 README.md
