@@ -1,49 +1,20 @@
-import { createSignal, For } from "solid-js";
+import { For } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import type { FormSubmitEvent, ListName, Todo } from "./types";
-import { TodoSet, type TodoSetProps } from "./components/TodoSet";
+import type { FormSubmitEvent } from "./types";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
 import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
 import { ListSelector } from "./components/ListSelector";
+import { TodoComp } from "./components/Todo";
 
 export function App() {
-  const [selectedList, setSelectedList] = createSignal<ListName>("reminders");
-  const [showDependentsForTodo, setShowDependentsForTodo] = createSignal<
-    Record<Todo["id"], boolean>
-  >({});
-
-  const [listsCount, todos, { addTodo, handleTodoCheck, addList }] = useDexie();
-
-  function handleShowDependent(id: Todo["id"]) {
-    setShowDependentsForTodo((curShownDependents) => ({
-      ...curShownDependents,
-      [id]: !curShownDependents[id],
-    }));
-  }
-
-  const independentTodos = () =>
-    todos()
-      .filter((i) => !i.dependsOn)
-      .sort((a, b) => a.createdAt - b.createdAt);
-
-  const getDependentProps = (id?: Todo["id"]): TodoSetProps | undefined => {
-    const dependentTodo = todos().find((i) => i.id === id);
-
-    if (dependentTodo) {
-      return {
-        todoProps: {
-          todo: dependentTodo,
-          class: "my-3",
-          onShowDependentClick: handleShowDependent,
-          onCheck: (checked) => handleTodoCheck(checked, dependentTodo),
-        },
-        dependentProps: getDependentProps(dependentTodo.dependent),
-        showDependent: showDependentsForTodo()[dependentTodo.id],
-      };
-    }
-  };
+  const [
+    listsCount,
+    todos,
+    selectedList,
+    { addTodo, handleTodoCheck, addList, setSelectedList },
+  ] = useDexie();
 
   function handleFormSubmit(event: FormSubmitEvent) {
     event.preventDefault();
@@ -107,21 +78,13 @@ export function App() {
         </div>
       </div>
       {/* Content */}
-      <div class="flex flex-1 gap-2 border border-green-400">
-        <For each={independentTodos()}>
+      <div class="flex flex-col gap-2 border border-green-400">
+        <For each={todos()}>
           {(todo) => (
-            <div class="border border-red-300 p-2">
-              <TodoSet
-                todoProps={{
-                  todo,
-                  class: "my-3",
-                  onShowDependentClick: handleShowDependent,
-                  onCheck: (checked) => handleTodoCheck(checked, todo),
-                }}
-                dependentProps={getDependentProps(todo.dependent)}
-                showDependent={showDependentsForTodo()[todo.id]}
-              />
-            </div>
+            <TodoComp
+              todo={todo}
+              onCheck={(checked) => handleTodoCheck(checked, todo)}
+            />
           )}
         </For>
         {/* todo form */}
