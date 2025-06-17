@@ -13,7 +13,7 @@ export function App() {
     listsCount,
     todos,
     selectedList,
-    { addTodo, handleTodoCheck, addList, setSelectedList },
+    { addTodo, handleTodoCheck, addList, chooseList },
   ] = useDexie();
 
   function handleFormSubmit(event: FormSubmitEvent) {
@@ -50,6 +50,9 @@ export function App() {
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
 
+  // has been defaulted to reminders
+  const chosenList = () => selectedList()?.name || "reminders";
+
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
@@ -60,8 +63,8 @@ export function App() {
               <ListSelector
                 list={list}
                 todoCount={todoCount}
-                selected={selectedList() === list.name}
-                onClick={() => setSelectedList(list.name)}
+                selected={chosenList() === list.name}
+                onClick={() => chooseList(list.name)}
               />
             )}
           </For>
