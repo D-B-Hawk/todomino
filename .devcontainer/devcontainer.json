@@ -6,5 +6,11 @@
   },
   "mounts": ["source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind"],
 
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode", "bradlc.vscode-tailwindcss"]
+    }
+  },
+
   "forwardPorts": [5173]
 }
