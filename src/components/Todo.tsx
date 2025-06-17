@@ -6,7 +6,6 @@ import { truncateText } from "../helpers/truncateText";
 export interface TodoProps {
   todo: Todo;
   onCheck: (checked: boolean) => void;
-  onShowDependentClick: (id: Todo["id"]) => void;
   class?: string;
 }
 
@@ -38,12 +37,6 @@ export const TodoComp: Component<TodoProps> = (props) => {
               <span>
                 Dependent:{truncateText(props.todo.dependent || "", 8)}
               </span>
-              <button
-                on:click={() => props.onShowDependentClick(props.todo.id)}
-                class="bg-green-400"
-              >
-                Show
-              </button>
             </div>
           </Show>
           <Show when={props.todo.dependsOn}>
