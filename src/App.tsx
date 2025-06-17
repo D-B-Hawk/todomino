@@ -52,9 +52,6 @@ export function App() {
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
 
-  // has been defaulted to reminders
-  const chosenList = () => selectedList()?.name || "reminders";
-
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
@@ -65,7 +62,7 @@ export function App() {
               <ListSelector
                 list={list}
                 todoCount={todoCount}
-                selected={chosenList() === list.name}
+                selected={selectedList() === list.name}
                 onClick={() => chooseList(list.name)}
               />
             )}

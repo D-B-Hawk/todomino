@@ -29,15 +29,14 @@ export function useDexie() {
     }),
   );
 
-  const chosenListObservable = liveQuery(() =>
-    db.chosenList.toCollection().first(),
-  );
+  const chosenListObservable = liveQuery(async () => {
+    const chosenList = await db.chosenList.toCollection().first();
+    return chosenList?.name;
+  });
 
   const lists = useObservable(listsObservable, []);
   const todos = useObservable(todosObservable, []);
-  const chosenList = useObservable(chosenListObservable, {
-    name: "reminders",
-  } satisfies ChosenList);
+  const chosenList = useObservable(chosenListObservable, "reminders");
 
   function addList(listName: ListName) {
     const newList = createList({ name: listName });
