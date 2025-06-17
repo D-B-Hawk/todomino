@@ -1,11 +1,16 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { List, Todo } from "./types";
+import type { List, ListName, Todo } from "./types";
 import { INIT_LIST_NAMES } from "./constants";
 import { createList } from "./helpers/createList";
+
+export type ChosenList = {
+  name: ListName;
+};
 
 export const db = new Dexie("TodosDB") as Dexie & {
   todos: EntityTable<Todo, "id">;
   lists: EntityTable<List, "name">;
+  chosenList: EntityTable<ChosenList, "name">;
 };
 
 // Schema declaration:
@@ -20,6 +25,7 @@ db.version(1).stores({
     dependent, 
     list`,
   lists: "name",
+  chosenList: "name",
 });
 
 db.on("populate", function (transaction) {
@@ -31,4 +37,5 @@ db.on("populate", function (transaction) {
     .catch((error) =>
       console.error("failed to initiliaze db with known lists", error),
     );
+  transaction.table("chosenList").add({ name: "reminders" });
 });

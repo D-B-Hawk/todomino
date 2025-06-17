@@ -13,7 +13,7 @@ export function App() {
     listsCount,
     todos,
     selectedList,
-    { addTodo, handleTodoCheck, addList, setSelectedList },
+    { addTodo, handleTodoCheck, addList, chooseList },
   ] = useDexie();
 
   function handleFormSubmit(event: FormSubmitEvent) {
@@ -45,7 +45,9 @@ export function App() {
       addList(parsed.data.listName)
         .then(() => form.reset())
         .catch((error) => console.error(error));
+      return;
     }
+    console.error(parsed.error);
   }
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
@@ -61,7 +63,7 @@ export function App() {
                 list={list}
                 todoCount={todoCount}
                 selected={selectedList() === list.name}
-                onClick={() => setSelectedList(list.name)}
+                onClick={() => chooseList(list.name)}
               />
             )}
           </For>
