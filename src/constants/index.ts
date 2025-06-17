@@ -74,13 +74,11 @@ export const TODO_FORM_SCHEMA = z.object({
   list: LIST_UNION,
 });
 
-const HEX_COLOR_REGEX =
-  /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+// const HEX_COLOR_REGEX =
+//   /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 export const LIST_FORM_SCHEMA = z.object({
   listName: LIST_UNION,
-  icon: z.enum(IconKey),
-  color: z.string().regex(HEX_COLOR_REGEX),
 });
 
 export const INIT_TODO_LISTS: TodoLists = {

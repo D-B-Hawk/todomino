@@ -45,7 +45,9 @@ export function App() {
       addList(parsed.data.listName)
         .then(() => form.reset())
         .catch((error) => console.error(error));
+      return;
     }
+    console.error(parsed.error);
   }
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
