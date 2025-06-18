@@ -55,12 +55,21 @@ export function App() {
 
   const todoListOptions = () =>
     listsCount().reduce<Option[]>((prev, cur) => {
-      if (cur.list.name !== "completed") {
+      const curListName = cur.list.name;
+
+      if (curListName !== "completed") {
         const option = {
           id: cur.list.name,
           value: cur.list.name,
         };
-        prev.push(option);
+
+        // make the selected list the first option when
+        // creating the todo
+        if (curListName === selectedList()) {
+          prev.unshift(option);
+        } else {
+          prev.push(option);
+        }
       }
       return prev;
     }, []);
