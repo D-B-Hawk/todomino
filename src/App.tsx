@@ -7,6 +7,7 @@ import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
 import { ListSelector } from "./components/ListSelector";
 import { TodoComp } from "./components/Todo";
+import type { Option } from "./components/SelectInput";
 
 export function App() {
   const [
@@ -51,6 +52,18 @@ export function App() {
   }
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
+
+  const todoListOptions = () =>
+    listsCount().reduce<Option[]>((prev, cur) => {
+      if (cur.list.name !== "completed") {
+        const option = {
+          id: cur.list.name,
+          value: cur.list.name,
+        };
+        prev.push(option);
+      }
+      return prev;
+    }, []);
 
   return (
     <div class="flex h-screen max-h-screen">
@@ -103,10 +116,7 @@ export function App() {
               }}
               listSelectProps={{
                 name: "list",
-                options: listsCount().map(({ list }) => ({
-                  id: list.name,
-                  value: list.name,
-                })),
+                options: todoListOptions(),
               }}
             />
           </div>
