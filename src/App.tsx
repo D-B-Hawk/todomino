@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
 import type { FormSubmitEvent } from "./types";
 import { useDexie } from "./hooks/useDexie";
@@ -90,25 +90,27 @@ export function App() {
           )}
         </For>
         {/* todo form */}
-        <div class="flex border-2 border-lime-200">
-          <TodoForm
-            onSubmit={handleFormSubmit}
-            dependentSelectProps={{
-              name: "dependsOn",
-              options: availableOptions().map((option) => ({
-                id: option.id,
-                value: option.description,
-              })),
-            }}
-            listSelectProps={{
-              name: "list",
-              options: listsCount().map(({ list }) => ({
-                id: list.name,
-                value: list.name,
-              })),
-            }}
-          />
-        </div>
+        <Show when={selectedList() !== "completed"}>
+          <div class="flex border-2 border-lime-200">
+            <TodoForm
+              onSubmit={handleFormSubmit}
+              dependentSelectProps={{
+                name: "dependsOn",
+                options: availableOptions().map((option) => ({
+                  id: option.id,
+                  value: option.description,
+                })),
+              }}
+              listSelectProps={{
+                name: "list",
+                options: listsCount().map(({ list }) => ({
+                  id: list.name,
+                  value: list.name,
+                })),
+              }}
+            />
+          </div>
+        </Show>
       </div>
     </div>
   );
