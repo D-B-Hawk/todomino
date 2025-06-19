@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
 import type { FormSubmitEvent } from "./types";
 import { useDexie } from "./hooks/useDexie";
@@ -7,6 +7,7 @@ import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
 import { ListSelector } from "./components/ListSelector";
 import { TodoComp } from "./components/Todo";
+import type { Option } from "./components/SelectInput";
 
 export function App() {
   const [
@@ -52,6 +53,27 @@ export function App() {
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
 
+  const todoListOptions = () =>
+    listsCount().reduce<Option[]>((prev, cur) => {
+      const curListName = cur.list.name;
+
+      if (curListName !== "completed") {
+        const option = {
+          id: cur.list.name,
+          value: cur.list.name,
+        };
+
+        // make the selected list the first option when
+        // creating the todo
+        if (curListName === selectedList()) {
+          prev.unshift(option);
+        } else {
+          prev.push(option);
+        }
+      }
+      return prev;
+    }, []);
+
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
@@ -90,25 +112,24 @@ export function App() {
           )}
         </For>
         {/* todo form */}
-        <div class="flex border-2 border-lime-200">
-          <TodoForm
-            onSubmit={handleFormSubmit}
-            dependentSelectProps={{
-              name: "dependsOn",
-              options: availableOptions().map((option) => ({
-                id: option.id,
-                value: option.description,
-              })),
-            }}
-            listSelectProps={{
-              name: "list",
-              options: listsCount().map(({ list }) => ({
-                id: list.name,
-                value: list.name,
-              })),
-            }}
-          />
-        </div>
+        <Show when={selectedList() !== "completed"}>
+          <div class="flex border-2 border-lime-200">
+            <TodoForm
+              onSubmit={handleFormSubmit}
+              dependentSelectProps={{
+                name: "dependsOn",
+                options: availableOptions().map((option) => ({
+                  id: option.id,
+                  value: option.description,
+                })),
+              }}
+              listSelectProps={{
+                name: "list",
+                options: todoListOptions(),
+              }}
+            />
+          </div>
+        </Show>
       </div>
     </div>
   );
