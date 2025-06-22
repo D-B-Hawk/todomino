@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { List, ListName, Todo } from "./types";
+import { TodoKey, type List, type ListName, type Todo } from "./types";
 import { INIT_LIST_NAMES } from "./constants";
 import { createList } from "./helpers/createList";
 
@@ -8,7 +8,7 @@ export type ChosenList = {
 };
 
 export const db = new Dexie("TodosDB") as Dexie & {
-  todos: EntityTable<Todo, "id">;
+  todos: EntityTable<Todo, TodoKey.ID>;
   lists: EntityTable<List, "name">;
   chosenList: EntityTable<ChosenList, "name">;
 };
@@ -16,14 +16,15 @@ export const db = new Dexie("TodosDB") as Dexie & {
 // Schema declaration:
 db.version(1).stores({
   todos: `
-    id, 
-    description,
-    createdAt, 
-    updatedAt, 
-    completedAt, 
-    dependsOn, 
-    dependent, 
-    list`,
+    ${TodoKey.ID}, 
+    ${TodoKey.DESCRIPTION},
+    ${TodoKey.CREATED_AT},
+    ${TodoKey.UPDATED_AT},
+    ${TodoKey.COMPLETED_AT},
+    ${TodoKey.DEPENDS_ON}, 
+    ${TodoKey.DEPENDENT},
+    ${TodoKey.LIST} 
+    `,
   lists: "name",
   chosenList: "name",
 });
