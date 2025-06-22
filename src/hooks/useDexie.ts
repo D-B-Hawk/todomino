@@ -4,6 +4,16 @@ import { useObservable } from "./useObservable";
 import type { ListName, Todo, ListCount } from "../types";
 import { createList } from "../helpers/createList";
 
+function getTodosByList(listName: ListName) {
+  if (listName === "completed") {
+    return db.todos.where("completedAt").above(0);
+  }
+  return db.todos
+    .where("list")
+    .equals(listName)
+    .and((todo) => !todo.completedAt);
+}
+
 export function useDexie() {
   const listsObservable = liveQuery(() =>
     db.transaction("r", db.lists, db.todos, async () => {
@@ -12,7 +22,7 @@ export function useDexie() {
       lists.forEach(async (list) => {
         listsCount.push({
           list,
-          todoCount: await db.todos.where("list").equals(list.name).count(),
+          todoCount: await getTodosByList(list.name).count(),
         });
       });
       return listsCount;
@@ -25,7 +35,13 @@ export function useDexie() {
       const chosenList: ChosenList = (await db.chosenList
         .toCollection()
         .first()) || { name: "reminders" };
-      return db.todos.where("list").equals(chosenList.name).sortBy("createdAt");
+
+      const todosCollection = getTodosByList(chosenList.name);
+
+      if (chosenList.name === "completed") {
+        return todosCollection.sortBy("completedAt");
+      }
+      return todosCollection.sortBy("createdAt");
     }),
   );
 
