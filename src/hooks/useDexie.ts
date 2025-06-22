@@ -1,15 +1,14 @@
 import { liveQuery } from "dexie";
-import { db, type ChosenList } from "../db";
+import { type ListName, type Todo, type ListCount, TodoKey } from "../types";
+import { db, type ChosenList, getTodosWhereKey, sortTodosByKey } from "../db";
 import { useObservable } from "./useObservable";
-import type { ListName, Todo, ListCount } from "../types";
 import { createList } from "../helpers/createList";
 
 function getTodosByList(listName: ListName) {
   if (listName === "completed") {
-    return db.todos.where("completedAt").above(0);
+    return getTodosWhereKey(TodoKey.COMPLETED_AT).above(0);
   }
-  return db.todos
-    .where("list")
+  return getTodosWhereKey(TodoKey.LIST)
     .equals(listName)
     .and((todo) => !todo.completedAt);
 }
@@ -39,9 +38,9 @@ export function useDexie() {
       const todosCollection = getTodosByList(chosenList.name);
 
       if (chosenList.name === "completed") {
-        return todosCollection.sortBy("completedAt");
+        return sortTodosByKey(TodoKey.COMPLETED_AT, todosCollection);
       }
-      return todosCollection.sortBy("createdAt");
+      return sortTodosByKey(TodoKey.CREATED_AT, todosCollection);
     }),
   );
 
@@ -90,7 +89,7 @@ export function useDexie() {
     const completedAt = checked ? now : undefined;
 
     return db.transaction("rw", db.todos, async () => {
-      db.todos.update(todo.id, {
+      db.todos.update(todo, {
         updatedAt: now,
         dependent: undefined,
         dependsOn: undefined,

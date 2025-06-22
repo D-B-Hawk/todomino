@@ -16,15 +16,26 @@ export type List = {
   updatedAt: number;
 };
 
+export enum TodoKey {
+  ID = "id",
+  DESCRIPTION = "description",
+  CREATED_AT = "createdAt",
+  UPDATED_AT = "updatedAt",
+  COMPLETED_AT = "completedAt",
+  DEPENDS_ON = "dependsOn",
+  DEPENDENT = "dependent",
+  LIST = "list",
+}
+
 export type Todo = {
-  id: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
-  completedAt?: number;
-  dependsOn?: Todo["id"];
-  dependent?: Todo["id"];
-  list: ListName;
+  [TodoKey.ID]: string;
+  [TodoKey.DESCRIPTION]: string;
+  [TodoKey.CREATED_AT]: number;
+  [TodoKey.UPDATED_AT]: number;
+  [TodoKey.COMPLETED_AT]?: number;
+  [TodoKey.DEPENDS_ON]?: Todo["id"];
+  [TodoKey.DEPENDENT]?: Todo["id"];
+  [TodoKey.LIST]: ListName;
 };
 
 export type TodoList = List & {
