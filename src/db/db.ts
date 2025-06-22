@@ -1,20 +1,21 @@
 import Dexie, { type EntityTable } from "dexie";
-import { TodoKey, type List, type ListName, type Todo } from "./types";
-import { INIT_LIST_NAMES } from "./constants";
-import { createList } from "./helpers/createList";
+import { TodoKey, type List, type ListName, type Todo } from "../types";
+import { INIT_LIST_NAMES } from "../constants";
+import { createList } from "../helpers/createList";
 
 export type ChosenList = {
   name: ListName;
 };
 
-export const db = new Dexie("TodosDB") as Dexie & {
+type TodosDBTable = {
   todos: EntityTable<Todo, TodoKey.ID>;
   lists: EntityTable<List, "name">;
   chosenList: EntityTable<ChosenList, "name">;
 };
 
-// Schema declaration:
-db.version(1).stores({
+export const db = new Dexie("TodosDB") as Dexie & TodosDBTable;
+
+const dbSchema: Record<keyof TodosDBTable, string> = {
   todos: `
     ${TodoKey.ID}, 
     ${TodoKey.DESCRIPTION},
@@ -27,16 +28,21 @@ db.version(1).stores({
     `,
   lists: "name",
   chosenList: "name",
-});
+};
 
+// Schema declaration:
+db.version(1).stores(dbSchema);
+
+// TOD0: Enforce using only known tablenames on transactions.
 db.on("populate", function (transaction) {
   transaction
-    .table("lists")
+    .table("lists") // I no likey this
     .bulkAdd([...INIT_LIST_NAMES].map((list) => createList({ name: list })))
     // eslint-disable-next-line no-console -- i want to know when this happens
     .then(() => console.log("initialized table with known lists"))
     .catch((error) =>
       console.error("failed to initiliaze db with known lists", error),
     );
+  // or this
   transaction.table("chosenList").add({ name: "reminders" });
 });
