@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import type { FormSubmitEvent } from "./types";
+import type { FormSubmitEvent, Todo } from "./types";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
 import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
@@ -8,6 +8,7 @@ import { getFormData } from "./helpers/getFormData";
 import { ListSelector } from "./components/ListSelector";
 import { TodoComp } from "./components/Todo";
 import type { Option } from "./components/SelectInput";
+import { useAsyncDebounce } from "./hooks/useAsyncDebounce";
 
 export function App() {
   const [
@@ -75,6 +76,14 @@ export function App() {
       return prev;
     }, []);
 
+  async function handleCheck(checked: boolean, todo: Todo) {
+    return handleTodoCheck(checked, todo).catch((error) =>
+      console.error(error),
+    );
+  }
+
+  const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
+
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
@@ -108,7 +117,7 @@ export function App() {
           {(todo) => (
             <TodoComp
               todo={todo}
-              onCheck={(checked) => handleTodoCheck(checked, todo)}
+              onCheck={(checked) => debouncedCheck(checked, todo)}
             />
           )}
         </For>
