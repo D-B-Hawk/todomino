@@ -92,6 +92,11 @@ export function useDexie() {
   }
 
   async function handleTodoCheck(checked: boolean, todo: Todo) {
+    // in the case of debouncing it is possible for nothing to change
+    // for that situation return
+    if (checked === !!todo[TodoKey.COMPLETED_AT]) {
+      return;
+    }
     const { dependentTodo, dependsOnTodo } = await getDependents(todo);
     const now = Date.now();
     const completedAt = checked ? now : undefined;
