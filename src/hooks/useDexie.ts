@@ -53,9 +53,17 @@ export function useDexie() {
   const todos = useObservable(todosObservable, []);
   const chosenList = useObservable(chosenListObservable, "reminders");
 
-  function addList(listName: ListName) {
+  async function addList(listName: ListName) {
+    const currentList = chosenList();
+    if (!currentList) {
+      throw new Error("no current list");
+    }
+
     const newList = createList({ name: listName });
-    return db.lists.add(newList);
+    return db.transaction("rw", db.lists, db.chosenList, async () => {
+      await db.lists.add(newList);
+      await db.chosenList.update(currentList, { name: listName });
+    });
   }
 
   function chooseList(listName: ListName) {

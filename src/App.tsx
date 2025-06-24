@@ -42,13 +42,14 @@ export function App() {
     const data = getFormData(form);
 
     const parsed = LIST_FORM_SCHEMA.safeParse(data);
-    if (parsed.success) {
-      addList(parsed.data.listName)
-        .then(() => form.reset())
-        .catch((error) => console.error(error));
+    if (parsed.error) {
+      console.error(parsed.error);
       return;
     }
-    console.error(parsed.error);
+
+    addList(parsed.data.listName)
+      .then(() => form.reset())
+      .catch((error) => console.error(error));
   }
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
