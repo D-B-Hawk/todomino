@@ -1,16 +1,16 @@
-import { For, Show } from "solid-js";
 import { createTodo } from "./helpers/createTodo";
-import type { FormSubmitEvent, Todo } from "./types";
+import { TodoKey, type FormSubmitEvent } from "./types";
 import { useDexie } from "./hooks/useDexie";
-import { TodoForm } from "./components/TodoForm";
+// import { TodoForm } from "./components/TodoForm";
 import { TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
 // import { ListSelector } from "./components/ListSelector";
-import { TodoComp } from "./components/Todo";
+// import { TodoComp } from "./components/Todo";
 import type { Option } from "./components/SelectInput";
-import { useAsyncDebounce } from "./hooks/useAsyncDebounce";
+// import { useAsyncDebounce } from "./hooks/useAsyncDebounce";
 import { ListView } from "./views/ListView";
 import { noop } from "./helpers/noop";
+import { TodosView } from "./views/TodosView";
 
 export function App() {
   const [
@@ -55,7 +55,16 @@ export function App() {
   //     .catch((error) => console.error(error));
   // }
 
-  const availableOptions = () => todos().filter((i) => !i.dependent);
+  const availableOptions = () =>
+    todos().reduce<Option[]>((prev, cur) => {
+      if (!cur[TodoKey.DEPENDENT]) {
+        prev.push({
+          id: cur[TodoKey.ID],
+          value: cur[TodoKey.DESCRIPTION],
+        });
+      }
+      return prev;
+    }, []);
 
   const todoListOptions = () =>
     listsCount().reduce<Option[]>((prev, cur) => {
@@ -78,14 +87,6 @@ export function App() {
       return prev;
     }, []);
 
-  async function handleCheck(checked: boolean, todo: Todo) {
-    return handleTodoCheck(checked, todo).catch((error) =>
-      console.error(error),
-    );
-  }
-
-  const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
-
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
@@ -95,36 +96,15 @@ export function App() {
         onChooseList={chooseList}
         onAddList={noop}
       />
-      {/* Content */}
-      <div class="flex flex-col gap-2 border border-green-400">
-        <For each={todos()}>
-          {(todo) => (
-            <TodoComp
-              todo={todo}
-              onCheck={(checked) => debouncedCheck(checked, todo)}
-            />
-          )}
-        </For>
-        {/* todo form */}
-        <Show when={selectedList() !== "completed"}>
-          <div class="flex border-2 border-lime-200">
-            <TodoForm
-              onSubmit={handleFormSubmit}
-              dependentSelectProps={{
-                name: "dependsOn",
-                options: availableOptions().map((option) => ({
-                  id: option.id,
-                  value: option.description,
-                })),
-              }}
-              listSelectProps={{
-                name: "list",
-                options: todoListOptions(),
-              }}
-            />
-          </div>
-        </Show>
-      </div>
+      {/* Todos */}
+      <TodosView
+        selectedListName={selectedList()}
+        todos={todos()}
+        onTodoCheck={handleTodoCheck}
+        availableDependentOptions={availableOptions()}
+        listSelectOptions={todoListOptions()}
+        onTodoFormSubmit={handleFormSubmit}
+      />
     </div>
   );
 }
