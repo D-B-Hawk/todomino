@@ -3,19 +3,21 @@ import { createTodo } from "./helpers/createTodo";
 import type { FormSubmitEvent, Todo } from "./types";
 import { useDexie } from "./hooks/useDexie";
 import { TodoForm } from "./components/TodoForm";
-import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
+import { TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
-import { ListSelector } from "./components/ListSelector";
+// import { ListSelector } from "./components/ListSelector";
 import { TodoComp } from "./components/Todo";
 import type { Option } from "./components/SelectInput";
 import { useAsyncDebounce } from "./hooks/useAsyncDebounce";
+import { ListView } from "./views/ListView";
+import { noop } from "./helpers/noop";
 
 export function App() {
   const [
     listsCount,
     todos,
     selectedList,
-    { addTodo, handleTodoCheck, addList, chooseList },
+    { addTodo, handleTodoCheck, chooseList },
   ] = useDexie();
 
   function handleFormSubmit(event: FormSubmitEvent) {
@@ -37,21 +39,21 @@ export function App() {
       .catch((error) => console.error("error adding todo =>", error));
   }
 
-  function handleListFormSubmit(event: FormSubmitEvent) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const data = getFormData(form);
+  // function handleListFormSubmit(event: FormSubmitEvent) {
+  //   event.preventDefault();
+  //   const form = event.currentTarget;
+  //   const data = getFormData(form);
 
-    const parsed = LIST_FORM_SCHEMA.safeParse(data);
-    if (parsed.error) {
-      console.error(parsed.error);
-      return;
-    }
+  //   const parsed = LIST_FORM_SCHEMA.safeParse(data);
+  //   if (parsed.error) {
+  //     console.error(parsed.error);
+  //     return;
+  //   }
 
-    addList(parsed.data.listName)
-      .then(() => form.reset())
-      .catch((error) => console.error(error));
-  }
+  //   addList(parsed.data.listName)
+  //     .then(() => form.reset())
+  //     .catch((error) => console.error(error));
+  // }
 
   const availableOptions = () => todos().filter((i) => !i.dependent);
 
@@ -87,30 +89,12 @@ export function App() {
   return (
     <div class="flex h-screen max-h-screen">
       {/* Lists */}
-      <div class="flex flex-col items-center justify-center gap-3 w-80 border-2 border-orange-400">
-        <div class="flex flex-wrap gap-2">
-          <For each={listsCount()}>
-            {({ list, todoCount }) => (
-              <ListSelector
-                list={list}
-                todoCount={todoCount}
-                selected={selectedList() === list.name}
-                onClick={() => chooseList(list.name)}
-              />
-            )}
-          </For>
-        </div>
-        <div class="flex flex-col border-2 items-center border-purple-300">
-          <h2>Add List</h2>
-          <form
-            class="flex flex-col gap-3 border border-blue-700 p-3 rounded-md"
-            onSubmit={handleListFormSubmit}
-          >
-            <input name="listName" type="text" />
-            <button class="bg-blue-400 p-3 rounded-md">ADD</button>
-          </form>
-        </div>
-      </div>
+      <ListView
+        selectedList={selectedList()}
+        listCounts={listsCount()}
+        onChooseList={chooseList}
+        onAddList={noop}
+      />
       {/* Content */}
       <div class="flex flex-col gap-2 border border-green-400">
         <For each={todos()}>
