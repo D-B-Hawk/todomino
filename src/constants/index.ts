@@ -5,7 +5,7 @@ import BoxIcon from "../assets/box.svg";
 import CheckCircleIcon from "../assets/check-circle.svg";
 import ClockIcon from "../assets/clock.svg";
 import CoffeeIcon from "../assets/coffee.svg";
-import DatabaseIcon from "../assets/coffee.svg";
+import DatabaseIcon from "../assets/database.svg";
 import FeatherIcon from "../assets/feather.svg";
 import GithubIcon from "../assets/github.svg";
 import LinkedInIcon from "../assets/linkedin.svg";
@@ -18,8 +18,13 @@ import TrelloIcon from "../assets/trello.svg";
 import TvIcon from "../assets/tv.svg";
 import YouTubeIcon from "../assets/youtube.svg";
 import ZapIcon from "../assets/zap.svg";
+import PlusCircleIcon from "../assets/plus-circle.svg";
 import { createList } from "../helpers/createList";
 import type { TodoLists } from "../types";
+
+export enum AppIconKey {
+  PLUS_CIRCLE = "plusCircle",
+}
 
 export enum IconKey {
   BOX = "box",
@@ -41,8 +46,10 @@ export enum IconKey {
   ZAP = "zap",
 }
 
+export const ICON_KEYS = Object.values(IconKey);
+
 export const ICON_MAP: Record<
-  IconKey,
+  IconKey | AppIconKey,
   Component<JSX.SvgSVGAttributes<SVGSVGElement>>
 > = {
   [IconKey.BOX]: BoxIcon,
@@ -62,6 +69,7 @@ export const ICON_MAP: Record<
   [IconKey.TV]: TvIcon,
   [IconKey.YOUTUBE]: YouTubeIcon,
   [IconKey.ZAP]: ZapIcon,
+  [AppIconKey.PLUS_CIRCLE]: PlusCircleIcon,
 };
 
 export const INIT_LIST_NAMES = ["reminders", "today", "completed"] as const;
@@ -78,7 +86,8 @@ export const TODO_FORM_SCHEMA = z.object({
 //   /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 export const LIST_FORM_SCHEMA = z.object({
-  listName: LIST_UNION,
+  name: LIST_UNION,
+  icon: z.enum(IconKey),
 });
 
 export const INIT_TODO_LISTS: TodoLists = {
