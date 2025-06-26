@@ -3,13 +3,10 @@ import { twMerge } from "tailwind-merge";
 
 export type Option = { id: string | number; value: string };
 
-export interface SelectInputProps
-  extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectInputProps extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
   options: Option[]; // for whatever reason options is not listed as an attribute in JSX.SelectHTMLAttributes
-  class?: string;
   withBlankOption?: boolean;
 }
-
 export function SelectInput(props: SelectInputProps) {
   return (
     <select class={twMerge("rounded-sm px-4 py-2", props.class)} {...props}>

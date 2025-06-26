@@ -1,7 +1,8 @@
 import { For } from "solid-js";
 import { ListSelector } from "../components/ListSelector";
 import type { ListCount, ListName } from "../types";
-import PlusAddIcon from "../assets/plus-circle.svg";
+import { AppIconKey } from "../constants";
+import { Icon } from "../components/Icon";
 
 type ListViewProps = {
   listCounts: ListCount[];
@@ -26,7 +27,7 @@ export function ListView(props: ListViewProps) {
         </For>
       </div>
       <button onClick={props.onAddList} class="flex gap-2">
-        <PlusAddIcon />
+        <Icon icon={AppIconKey.PLUS_CIRCLE} class="w-6 h-6" />
         <span>Add List</span>
       </button>
     </div>

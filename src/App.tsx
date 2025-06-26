@@ -1,26 +1,21 @@
-import { Show } from "solid-js";
-import { Portal } from "solid-js/web";
 import { createTodo } from "./helpers/createTodo";
 import { TodoKey, type FormSubmitEvent } from "./types";
-import { useDexie, useToggle, useOnClickOutside } from "./hooks";
-// import { TodoForm } from "./components/TodoForm";
-import { TODO_FORM_SCHEMA } from "./constants";
+import { useDexie, useToggle } from "./hooks";
+import { LIST_FORM_SCHEMA, TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
-// import { ListSelector } from "./components/ListSelector";
-// import { TodoComp } from "./components/Todo";
 import type { Option } from "./components/SelectInput";
 import { ListView } from "./views/ListView";
 import { TodosView } from "./views/TodosView";
+import { Modal } from "./components/Modal";
+import { AddListForm } from "./components/AddListForm";
 
 export function App() {
   const [showAddListMenu, { toggle }] = useToggle();
-  let formRef: HTMLFormElement | undefined;
-
   const [
     listsCount,
     todos,
     selectedList,
-    { addTodo, handleTodoCheck, chooseList },
+    { addTodo, handleTodoCheck, chooseList, addList },
   ] = useDexie();
 
   function handleFormSubmit(event: FormSubmitEvent) {
@@ -42,21 +37,24 @@ export function App() {
       .catch((error) => console.error("error adding todo =>", error));
   }
 
-  // function handleListFormSubmit(event: FormSubmitEvent) {
-  //   event.preventDefault();
-  //   const form = event.currentTarget;
-  //   const data = getFormData(form);
+  function handleListFormSubmit(event: FormSubmitEvent) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = getFormData(form);
 
-  //   const parsed = LIST_FORM_SCHEMA.safeParse(data);
-  //   if (parsed.error) {
-  //     console.error(parsed.error);
-  //     return;
-  //   }
+    const parsed = LIST_FORM_SCHEMA.safeParse(data);
+    if (parsed.error) {
+      console.error(parsed.error);
+      return;
+    }
 
-  //   addList(parsed.data.listName)
-  //     .then(() => form.reset())
-  //     .catch((error) => console.error(error));
-  // }
+    addList(parsed.data)
+      .then(() => {
+        form.reset();
+        toggle();
+      })
+      .catch((error) => console.error(error));
+  }
 
   const availableOptions = () =>
     todos().reduce<Option[]>((prev, cur) => {
@@ -90,8 +88,6 @@ export function App() {
       return prev;
     }, []);
 
-  useOnClickOutside(() => formRef, toggle);
-
   return (
     <>
       <div class="flex h-screen max-h-screen">
@@ -112,18 +108,13 @@ export function App() {
           onTodoFormSubmit={handleFormSubmit}
         />
       </div>
-      <Show when={showAddListMenu()}>
-        <Portal>
-          <div class="absolute top-0 left-0 flex items-center justify-center border-2 border-red-500 w-screen h-screen bg-black/15">
-            <form
-              class="flex flex-col bg-white rounded-lg w-80 h-96"
-              ref={formRef}
-            >
-              <h1>Add a list</h1>
-            </form>
-          </div>
-        </Portal>
-      </Show>
+      <Modal showModal={showAddListMenu()}>
+        <AddListForm
+          onCloseForm={toggle}
+          onSubmit={handleListFormSubmit}
+          onOutsideFormClick={toggle}
+        />
+      </Modal>
     </>
   );
 }
