@@ -8,9 +8,7 @@ export function useOnClickOutside<T extends MaybeElement>(
   handler: (event: PossibleEvent) => void,
 ) {
   const listener = (event: PossibleEvent) => {
-    const element = ref() ?? null;
-
-    if (!element || withinBounds(element, event)) {
+    if (!ref() || withinBounds(ref(), event)) {
       return;
     }
     handler(event);
@@ -27,6 +25,8 @@ export function useOnClickOutside<T extends MaybeElement>(
   });
 }
 
-function withinBounds(element: HTMLElement, event: PossibleEvent) {
-  return event.target instanceof Node && element.contains(event.target);
+function withinBounds(element: MaybeElement, event: PossibleEvent) {
+  return (
+    element && event.target instanceof Node && element.contains(event.target)
+  );
 }
