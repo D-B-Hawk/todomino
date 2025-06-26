@@ -2,7 +2,7 @@ import { liveQuery } from "dexie";
 import { type ListName, type Todo, type ListCount, TodoKey } from "../types";
 import { db, type ChosenList, getTodosWhereKey, sortTodosByKey } from "../db";
 import { useObservable } from "./useObservable";
-import { createList } from "../helpers/createList";
+import { createList, type CreateListArgs } from "../helpers/createList";
 
 function getTodosByList(listName: ListName) {
   if (listName === "completed") {
@@ -53,16 +53,16 @@ export function useDexie() {
   const todos = useObservable(todosObservable, []);
   const chosenList = useObservable(chosenListObservable, "reminders");
 
-  async function addList(listName: ListName) {
+  async function addList(args: CreateListArgs) {
     const currentList = chosenList();
     if (!currentList) {
       throw new Error("no current list");
     }
 
-    const newList = createList({ name: listName });
+    const newList = createList(args);
     return db.transaction("rw", db.lists, db.chosenList, async () => {
       await db.lists.add(newList);
-      await db.chosenList.update(currentList, { name: listName });
+      await db.chosenList.update(currentList, { name: newList.name });
     });
   }
 
