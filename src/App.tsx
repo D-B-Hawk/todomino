@@ -1,18 +1,21 @@
+import { Show } from "solid-js";
+import { Portal } from "solid-js/web";
 import { createTodo } from "./helpers/createTodo";
 import { TodoKey, type FormSubmitEvent } from "./types";
-import { useDexie } from "./hooks/useDexie";
+import { useDexie, useToggle, useOnClickOutside } from "./hooks";
 // import { TodoForm } from "./components/TodoForm";
 import { TODO_FORM_SCHEMA } from "./constants";
 import { getFormData } from "./helpers/getFormData";
 // import { ListSelector } from "./components/ListSelector";
 // import { TodoComp } from "./components/Todo";
 import type { Option } from "./components/SelectInput";
-// import { useAsyncDebounce } from "./hooks/useAsyncDebounce";
 import { ListView } from "./views/ListView";
-import { noop } from "./helpers/noop";
 import { TodosView } from "./views/TodosView";
 
 export function App() {
+  const [showAddListMenu, { toggle }] = useToggle();
+  let formRef: HTMLFormElement | undefined;
+
   const [
     listsCount,
     todos,
@@ -87,24 +90,40 @@ export function App() {
       return prev;
     }, []);
 
+  useOnClickOutside(() => formRef, toggle);
+
   return (
-    <div class="flex h-screen max-h-screen">
-      {/* Lists */}
-      <ListView
-        selectedList={selectedList()}
-        listCounts={listsCount()}
-        onChooseList={chooseList}
-        onAddList={noop}
-      />
-      {/* Todos */}
-      <TodosView
-        selectedListName={selectedList()}
-        todos={todos()}
-        onTodoCheck={handleTodoCheck}
-        availableDependentOptions={availableOptions()}
-        listSelectOptions={todoListOptions()}
-        onTodoFormSubmit={handleFormSubmit}
-      />
-    </div>
+    <>
+      <div class="flex h-screen max-h-screen">
+        {/* Lists */}
+        <ListView
+          selectedList={selectedList()}
+          listCounts={listsCount()}
+          onChooseList={chooseList}
+          onAddList={toggle}
+        />
+        {/* Todos */}
+        <TodosView
+          selectedListName={selectedList()}
+          todos={todos()}
+          onTodoCheck={handleTodoCheck}
+          availableDependentOptions={availableOptions()}
+          listSelectOptions={todoListOptions()}
+          onTodoFormSubmit={handleFormSubmit}
+        />
+      </div>
+      <Show when={showAddListMenu()}>
+        <Portal>
+          <div class="absolute top-0 left-0 flex items-center justify-center border-2 border-red-500 w-screen h-screen bg-black/15">
+            <form
+              class="flex flex-col bg-white rounded-lg w-80 h-96"
+              ref={formRef}
+            >
+              <h1>Add a list</h1>
+            </form>
+          </div>
+        </Portal>
+      </Show>
+    </>
   );
 }
