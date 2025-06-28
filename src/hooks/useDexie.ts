@@ -1,8 +1,17 @@
 import { liveQuery } from "dexie";
-import { type ListName, type Todo, type ListCount, TodoKey } from "../types";
+import { type ListName, type Todo, TodoKey } from "../types";
 import { db, type ChosenList, getTodosWhereKey, sortTodosByKey } from "../db";
 import { useObservable } from "./useObservable";
 import { createList, type CreateListArgs } from "../helpers/createList";
+
+type ListTodoCount = Record<ListName, number>;
+
+const INIT_LIST_TODO_COUNT: ListTodoCount = {
+  completed: 0,
+  reminders: 0,
+  today: 0,
+  todomino: 0,
+};
 
 function getTodosByList(listName: ListName) {
   if (listName === "completed") {
@@ -15,20 +24,21 @@ function getTodosByList(listName: ListName) {
 
 export function useDexie() {
   const listsObservable = liveQuery(() =>
+    db.transaction("r", db.lists, () => db.lists.toArray()),
+  );
+
+  const listTodoCountObservable = liveQuery(() =>
     db.transaction("r", db.lists, db.todos, async () => {
-      const listsCount: ListCount[] = [];
+      const listsTodoCount = { ...INIT_LIST_TODO_COUNT };
       const lists = await db.lists.toArray();
       lists.forEach(async (list) => {
-        listsCount.push({
-          list,
-          todoCount: await getTodosByList(list.name).count(),
-        });
+        listsTodoCount[list.name] = await getTodosByList(list.name).count();
       });
-      return listsCount;
+      return listsTodoCount;
     }),
   );
 
-  const todosObservable = liveQuery(() =>
+  const chosenListTodosObservable = liveQuery(() =>
     db.transaction("r", db.chosenList, db.todos, async () => {
       // defaulting the chosen list to reminders
       const chosenList: ChosenList = (await db.chosenList
@@ -44,17 +54,20 @@ export function useDexie() {
     }),
   );
 
-  const chosenListObservable = liveQuery(async () => {
+  const chosenListNameObservable = liveQuery(async () => {
     const chosenList = await db.chosenList.toCollection().first();
     return chosenList?.name;
   });
 
   const lists = useObservable(listsObservable, []);
-  const todos = useObservable(todosObservable, []);
-  const chosenList = useObservable(chosenListObservable, "reminders");
+  const chosenListTodos = useObservable(chosenListTodosObservable, []);
+  const listsTodoCount = useObservable(listTodoCountObservable, {
+    ...INIT_LIST_TODO_COUNT,
+  });
+  const chosenListName = useObservable(chosenListNameObservable, "reminders");
 
   async function addList(args: CreateListArgs) {
-    const currentList = chosenList();
+    const currentList = chosenListName();
     if (!currentList) {
       throw new Error("no current list");
     }
@@ -67,7 +80,7 @@ export function useDexie() {
   }
 
   function chooseList(listName: ListName) {
-    const currentList = chosenList();
+    const currentList = chosenListName();
     if (currentList) {
       db.chosenList.update(currentList, { name: listName });
       return;
@@ -137,10 +150,19 @@ export function useDexie() {
     };
   }
 
-  return [
+  const dexieState = {
     lists,
-    todos,
-    chosenList,
-    { addTodo, handleTodoCheck, addList, chooseList },
-  ] as const;
+    listsTodoCount,
+    chosenListTodos,
+    chosenListName,
+  };
+
+  const dexieMethods = {
+    addTodo,
+    handleTodoCheck,
+    addList,
+    chooseList,
+  };
+
+  return [dexieState, dexieMethods] as const;
 }
