@@ -1,27 +1,27 @@
 import { For } from "solid-js";
 import { ListSelector } from "../components/ListSelector";
-import type { ListCount, ListName } from "../types";
 import { AppIconKey } from "../constants";
 import { Icon } from "../components/Icon";
+import { useDexie } from "../hooks";
 
 type ListViewProps = {
-  listCounts: ListCount[];
-  selectedList: ListName | undefined;
   onAddList: () => void;
-  onChooseList: (listName: ListName) => void;
 };
 
 export function ListView(props: ListViewProps) {
+  const [{ lists, listsTodoCount, chosenListName }, { chooseList }] =
+    useDexie();
+
   return (
     <div class="flex flex-col items-center justify-between p-4 w-96 border-2 border-orange-400">
-      <div class="flex items-center justify-center flex-wrap gap-2">
-        <For each={props.listCounts}>
-          {({ list, todoCount }) => (
+      <div class="flex flex-wrap gap-2 border border-green-200">
+        <For each={lists()}>
+          {(list) => (
             <ListSelector
               list={list}
-              todoCount={todoCount}
-              selected={props.selectedList === list.name}
-              onClick={() => props.onChooseList(list.name)}
+              todoCount={listsTodoCount()[list.name]}
+              selected={chosenListName() === list.name}
+              onClick={() => chooseList(list.name)}
             />
           )}
         </For>
