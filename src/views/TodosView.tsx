@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js";
 import { TodoComp } from "../components/Todo";
-import { TodoKey, type FormSubmitEvent } from "../types";
+import { TodoKey, type FormSubmitEvent, type Todo } from "../types";
 import { TodoForm } from "../components/TodoForm";
 import type { SelectOption } from "../components/SelectInput";
-import { useDexie } from "../hooks";
+import { useAsyncDebounce, useDexie } from "../hooks";
 import { isRestrictedListName } from "../helpers/isRestrictedListName";
 import { getFormData } from "../helpers/getFormData";
 import { TODO_FORM_SCHEMA } from "../constants";
@@ -68,13 +68,21 @@ export function TodosView() {
       .catch((error) => console.error("error adding todo =>", error));
   }
 
+  async function handleCheck(checked: boolean, todo: Todo) {
+    return handleTodoCheck(checked, todo).catch((error) =>
+      console.error(error),
+    );
+  }
+
+  const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
+
   return (
     <div class="flex flex-col gap-2 border border-green-400">
       <For each={chosenListTodos()}>
         {(todo) => (
           <TodoComp
             todo={todo}
-            onCheck={(checked) => handleTodoCheck(checked, todo)}
+            onCheck={(checked) => debouncedCheck(checked, todo)}
           />
         )}
       </For>

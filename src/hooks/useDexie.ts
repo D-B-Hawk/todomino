@@ -13,9 +13,15 @@ const INIT_LIST_TODO_COUNT: ListTodoCount = {
   todomino: 0,
 };
 
-function getTodosByList(listName: ListName) {
+function getTodosByListName(listName: ListName) {
   if (listName === "completed") {
     return getTodosWhereKey(TodoKey.COMPLETED_AT).above(0);
+  }
+  if (listName === "todomino") {
+    return getTodosWhereKey(TodoKey.DEPENDENT)
+      .notEqual("")
+      .or(TodoKey.DEPENDS_ON)
+      .notEqual("");
   }
   return getTodosWhereKey(TodoKey.LIST)
     .equals(listName)
@@ -32,7 +38,7 @@ export function useDexie() {
       const listsTodoCount = { ...INIT_LIST_TODO_COUNT };
       const lists = await db.lists.toArray();
       lists.forEach(async (list) => {
-        listsTodoCount[list.name] = await getTodosByList(list.name).count();
+        listsTodoCount[list.name] = await getTodosByListName(list.name).count();
       });
       return listsTodoCount;
     }),
@@ -41,13 +47,13 @@ export function useDexie() {
   const chosenListTodosObservable = liveQuery(() =>
     db.transaction("r", db.chosenList, db.todos, async () => {
       // defaulting the chosen list to reminders
-      const chosenList: ChosenList = (await db.chosenList
+      const { name: chosenListName }: ChosenList = (await db.chosenList
         .toCollection()
         .first()) || { name: "reminders" };
 
-      const todosCollection = getTodosByList(chosenList.name);
+      const todosCollection = getTodosByListName(chosenListName);
 
-      if (chosenList.name === "completed") {
+      if (chosenListName === "completed") {
         return sortTodosByKey(TodoKey.COMPLETED_AT, todosCollection);
       }
       return sortTodosByKey(TodoKey.CREATED_AT, todosCollection);
