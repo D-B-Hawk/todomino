@@ -1,7 +1,10 @@
 import type { DOMElement } from "solid-js/jsx-runtime";
-import { IconKey, INIT_LIST_NAMES } from "./constants";
+import { IconKey, INIT_LIST_NAMES, READONLY_LIST_NAMES } from "./constants";
 
-export type ListName = (typeof INIT_LIST_NAMES)[number] | (string & {});
+export type RestrictedListName = (typeof READONLY_LIST_NAMES)[number];
+export type InitalListName = (typeof INIT_LIST_NAMES)[number];
+
+export type ListName = InitalListName | RestrictedListName | (string & {});
 
 export type FormSubmitEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;

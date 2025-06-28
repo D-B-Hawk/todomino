@@ -1,41 +1,103 @@
 import { For, Show } from "solid-js";
 import { TodoComp } from "../components/Todo";
-import type { FormSubmitEvent, ListName, Todo } from "../types";
+import { TodoKey, type FormSubmitEvent, type Todo } from "../types";
 import { TodoForm } from "../components/TodoForm";
-import type { Option } from "../components/SelectInput";
+import type { SelectOption } from "../components/SelectInput";
+import { useAsyncDebounce, useDexie } from "../hooks";
+import { isRestrictedListName } from "../helpers/isRestrictedListName";
+import { getFormData } from "../helpers/getFormData";
+import { TODO_FORM_SCHEMA } from "../constants";
+import { createTodo } from "../helpers/createTodo";
 
-type TodosViewProps = {
-  todos: Todo[];
-  selectedListName: ListName | undefined;
-  availableDependentOptions: Option[];
-  listSelectOptions: Option[];
-  onTodoFormSubmit: (event: FormSubmitEvent) => void;
-  onTodoCheck: (checked: boolean, todo: Todo) => void;
-};
+export function TodosView() {
+  const [
+    { lists, chosenListTodos, chosenListName },
+    { addTodo, handleTodoCheck },
+  ] = useDexie();
 
-export function TodosView(props: TodosViewProps) {
+  // returns  an array of select options for lists
+  // that are not readonly
+  const listSelectOptions = () =>
+    lists().reduce<SelectOption[]>((prev, { name }) => {
+      if (!isRestrictedListName(name)) {
+        const option = {
+          id: name,
+          value: name,
+        };
+
+        // make the selected list the first option when
+        // creating the todo
+        if (name === chosenListName()) {
+          prev.unshift(option);
+        } else {
+          prev.push(option);
+        }
+      }
+      return prev;
+    }, []);
+
+  // return an array of select options for todos that
+  // currently have no todo that is dependent on it
+  const availableDependentOptions = () =>
+    chosenListTodos().reduce<SelectOption[]>((prev, cur) => {
+      if (!cur[TodoKey.DEPENDENT]) {
+        prev.push({
+          id: cur[TodoKey.ID],
+          value: cur[TodoKey.DESCRIPTION],
+        });
+      }
+      return prev;
+    }, []);
+
+  function handleFormSubmit(event: FormSubmitEvent) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const data = getFormData(form);
+
+    const res = TODO_FORM_SCHEMA.safeParse(data);
+    if (!res.success) {
+      console.error(res.error);
+      return;
+    }
+
+    const todo = createTodo(res.data);
+
+    addTodo(todo)
+      .then(() => form.reset())
+      .catch((error) => console.error("error adding todo =>", error));
+  }
+
+  async function handleCheck(checked: boolean, todo: Todo) {
+    return handleTodoCheck(checked, todo).catch((error) =>
+      console.error(error),
+    );
+  }
+
+  const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
+
   return (
     <div class="flex flex-col gap-2 border border-green-400">
-      <For each={props.todos}>
+      <For each={chosenListTodos()}>
         {(todo) => (
           <TodoComp
             todo={todo}
-            onCheck={(checked) => props.onTodoCheck(checked, todo)}
+            onCheck={(checked) => debouncedCheck(checked, todo)}
           />
         )}
       </For>
       {/* todo form */}
-      <Show when={props.selectedListName !== "completed"}>
+      <Show when={!isRestrictedListName(chosenListName())}>
         <div class="flex border-2 border-lime-200">
           <TodoForm
-            onSubmit={props.onTodoFormSubmit}
+            onSubmit={handleFormSubmit}
             listSelectProps={{
               name: "list",
-              options: props.listSelectOptions,
+              options: listSelectOptions(),
             }}
             dependentSelectProps={{
               name: "dependsOn",
-              options: props.availableDependentOptions,
+              options: availableDependentOptions(),
               withBlankOption: true,
             }}
           />

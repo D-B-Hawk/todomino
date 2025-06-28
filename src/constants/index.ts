@@ -19,8 +19,6 @@ import TvIcon from "../assets/tv.svg";
 import YouTubeIcon from "../assets/youtube.svg";
 import ZapIcon from "../assets/zap.svg";
 import PlusCircleIcon from "../assets/plus-circle.svg";
-import { createList } from "../helpers/createList";
-import type { TodoLists } from "../types";
 
 export enum AppIconKey {
   PLUS_CIRCLE = "plusCircle",
@@ -72,26 +70,17 @@ export const ICON_MAP: Record<
   [AppIconKey.PLUS_CIRCLE]: PlusCircleIcon,
 };
 
-export const INIT_LIST_NAMES = ["reminders", "today", "completed"] as const;
+export const READONLY_LIST_NAMES = ["completed", "todomino", "today"] as const;
+
+export const INIT_LIST_NAMES = ["reminders"] as const;
 
 export const LIST_UNION = z.union([z.enum(INIT_LIST_NAMES), z.string().min(1)]);
 
 export const TODO_FORM_SCHEMA = z.object({
   description: z.string().min(1),
-  dependsOn: z.uuid().optional(),
+  dependsOn: z.string().optional(),
   list: LIST_UNION,
 });
 
 // const HEX_COLOR_REGEX =
 //   /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-
-export const LIST_FORM_SCHEMA = z.object({
-  name: LIST_UNION,
-  icon: z.enum(IconKey),
-});
-
-export const INIT_TODO_LISTS: TodoLists = {
-  completed: { ...createList({ name: "completed" }), todos: [] },
-  reminders: { ...createList({ name: "reminders" }), todos: [] },
-  today: { ...createList({ name: "today" }), todos: [] },
-};

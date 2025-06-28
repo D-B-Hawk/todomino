@@ -2,7 +2,9 @@ import type { Collection, InsertType } from "dexie";
 import type { Todo, TodoKey } from "../types";
 import { db } from "./db";
 
-export function getTodosWhereKey<K extends keyof Todo>(key: K) {
+export function getTodosWhereKey<K extends keyof Todo | Array<keyof Todo>>(
+  key: K,
+) {
   return db.todos.where(key);
 }
 

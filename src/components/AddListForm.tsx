@@ -4,11 +4,19 @@ import { TextField } from "./TextField";
 import { AppIconKey, ICON_KEYS, IconKey } from "../constants";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
-import { useOnClickOutside } from "../hooks";
+import { useDexie, useOnClickOutside } from "../hooks";
+import type { FormSubmitEvent } from "../types";
+import { getFormData } from "../helpers/getFormData";
+import { z } from "zod/v4";
 
-interface AddListFormProps extends JSX.HTMLAttributes<HTMLFormElement> {
+interface AddListFormProps
+  extends Omit<
+    JSX.HTMLAttributes<HTMLFormElement>,
+    "onSubmit" | "on:submit" | "onsubmit"
+  > {
   onCloseForm: () => void;
   onOutsideFormClick: () => void;
+  onFormSubmitSuccess: () => void;
 }
 
 export function AddListForm(props: AddListFormProps) {
@@ -16,12 +24,44 @@ export function AddListForm(props: AddListFormProps) {
     "class",
     "onCloseForm",
     "onOutsideFormClick",
+    "onFormSubmitSuccess",
   ]);
   const [iconKey, setIconKey] = createSignal<IconKey>(IconKey.BOX);
 
   let formRef: HTMLFormElement | undefined;
 
   useOnClickOutside(() => formRef, local.onOutsideFormClick);
+
+  const [{ lists }, { addList }] = useDexie();
+
+  const LIST_FORM_SCHEMA = z.object({
+    name: z
+      .string()
+      .trim()
+      .refine((val) => !lists().find((list) => list.name === val), {
+        error: "list name is taken",
+      }),
+    icon: z.enum(IconKey),
+  });
+
+  function handleListFormSubmit(event: FormSubmitEvent) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = getFormData(form);
+
+    const parsed = LIST_FORM_SCHEMA.safeParse(data);
+    if (parsed.error) {
+      console.error(parsed.error);
+      return;
+    }
+
+    addList(parsed.data)
+      .then(() => {
+        form.reset();
+        local.onFormSubmitSuccess();
+      })
+      .catch((error) => console.error(error));
+  }
 
   return (
     <form
@@ -30,6 +70,7 @@ export function AddListForm(props: AddListFormProps) {
         local.class,
       )}
       ref={formRef}
+      onSubmit={handleListFormSubmit}
       {...formProps}
     >
       <button
