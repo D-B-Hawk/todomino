@@ -77,7 +77,7 @@ export function TodosView() {
   const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
 
   return (
-    <div class="flex flex-col gap-2 border border-green-400">
+    <div class="flex flex-col overflow-y-scroll pb-2 gap-2 border border-green-400">
       <For each={chosenListTodos()}>
         {(todo) => (
           <TodoComp

@@ -9,7 +9,7 @@ export function App() {
 
   return (
     <>
-      <div class="flex h-screen max-h-screen">
+      <div class="flex h-screen max-h-screen overflow-hidden">
         <ListView onAddList={toggle} />
         <TodosView />
       </div>
