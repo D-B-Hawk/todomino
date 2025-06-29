@@ -1,5 +1,6 @@
 import { createSignal, For, splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
+import { z } from "zod/v4";
 import { TextField } from "./TextField";
 import { AppIconKey, ICON_KEYS, IconKey } from "../constants";
 import { IconButton } from "./IconButton";
@@ -7,7 +8,7 @@ import { Icon } from "./Icon";
 import { useDexie, useOnClickOutside } from "../hooks";
 import type { FormSubmitEvent } from "../types";
 import { getFormData } from "../helpers/getFormData";
-import { z } from "zod/v4";
+import { ColorPicker, PickerColor } from "./ColorPicker";
 
 interface AddListFormProps
   extends Omit<
@@ -27,6 +28,7 @@ export function AddListForm(props: AddListFormProps) {
     "onFormSubmitSuccess",
   ]);
   const [iconKey, setIconKey] = createSignal<IconKey>(IconKey.BOX);
+  const [iconColor, setIconColor] = createSignal<PickerColor>(PickerColor.BLUE);
 
   let formRef: HTMLFormElement | undefined;
 
@@ -42,6 +44,7 @@ export function AddListForm(props: AddListFormProps) {
         error: "list name is taken",
       }),
     icon: z.enum(IconKey),
+    color: z.enum(PickerColor),
   });
 
   function handleListFormSubmit(event: FormSubmitEvent) {
@@ -83,13 +86,21 @@ export function AddListForm(props: AddListFormProps) {
           class="rotate-45 rounded-full w-full h-full stroke-[1.5] stroke-slate-400"
         />
       </button>
-      <div class="border p-2 h-fit w-fit rounded-full self-center bg-red-500">
+      <div
+        class="border p-2 h-fit w-fit rounded-full self-center"
+        style={{ "background-color": iconColor() }}
+      >
         <Icon icon={iconKey()} />
       </div>
       <label class="flex gap-2 items-center">
         Name:
         <TextField name="name" required />
       </label>
+      <input type="text" value={iconColor()} hidden name="color" />
+      <div class="flex flex-col items-center w-[200px] self-center gap-4">
+        <h2 class="font-semibold">Color</h2>
+        <ColorPicker selectedColor={iconColor()} onColorPicked={setIconColor} />
+      </div>
       <input type="text" value={iconKey()} hidden name="icon" />
       <div class="flex flex-col items-center gap-4">
         <h3 class="self-center font-semibold">Icon</h3>
@@ -98,9 +109,7 @@ export function AddListForm(props: AddListFormProps) {
             {(key) => (
               <IconButton
                 onClick={() => setIconKey(key)}
-                classList={{
-                  "bg-red-500": key === iconKey(),
-                }}
+                style={{ "background-color": iconColor() }}
                 iconProps={{ icon: key }}
               />
             )}
