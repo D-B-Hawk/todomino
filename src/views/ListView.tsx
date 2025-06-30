@@ -13,8 +13,8 @@ export function ListView(props: ListViewProps) {
     useDexie();
 
   return (
-    <div class="flex flex-col items-center justify-between p-4 w-96 border-2 border-orange-400">
-      <div class="flex flex-wrap gap-2 border border-green-200">
+    <div class="flex flex-col items-center justify-between p-4 gap-4 w-96 overflow-y-auto">
+      <div class="flex flex-wrap gap-2">
         <For each={lists()}>
           {(list) => (
             <ListSelector
