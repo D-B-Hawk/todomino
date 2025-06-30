@@ -3,13 +3,13 @@ import { twMerge } from "tailwind-merge";
 
 import { ICON_MAP } from "../constants";
 import type { List } from "../types";
+import { Dynamic } from "solid-js/web";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   list: List;
   todoCount: number;
   selected?: boolean;
-  class?: string;
 }
 
 export function ListSelector(props: ListSelectorProps) {
@@ -19,8 +19,6 @@ export function ListSelector(props: ListSelectorProps) {
     "selected",
     "class",
   ]);
-
-  const Icon = ICON_MAP[localProps.list.icon];
 
   return (
     <button
@@ -36,12 +34,15 @@ export function ListSelector(props: ListSelectorProps) {
           style={{ "background-color": localProps.list.color }}
           class="p-1 rounded-full border border-white"
         >
-          <Icon class="stroke-white" />
+          <Dynamic
+            component={ICON_MAP[localProps.list.icon]}
+            class="stroke-white"
+          />
         </div>
 
         <b>{localProps.todoCount}</b>
       </div>
-      <b class="text-md font-semibold">{localProps.list.name}</b>
+      <b class="text-md font-semibold text-start">{localProps.list.name}</b>
     </button>
   );
 }
