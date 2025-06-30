@@ -94,7 +94,7 @@ export function AddListForm(props: AddListFormProps) {
       </div>
       <label class="flex gap-2 items-center">
         Name:
-        <TextField name="name" required />
+        <TextField name="name" required maxLength={18} />
       </label>
       <input type="text" value={iconColor()} hidden name="color" />
       <div class="flex flex-col items-center w-[200px] self-center gap-4">
