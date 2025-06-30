@@ -1,7 +1,9 @@
 import { splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 
-export function TextField(props: JSX.SelectHTMLAttributes<HTMLInputElement>) {
+type TextFieldProps = Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "type">;
+
+export function TextField(props: TextFieldProps) {
   const [local, inputProps] = splitProps(props, ["class"]);
   return (
     <input
