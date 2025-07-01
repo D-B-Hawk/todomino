@@ -10,7 +10,7 @@ import type { FormSubmitEvent } from "../types";
 import { getFormData } from "../helpers/getFormData";
 import { ColorPicker, PickerColor } from "./ColorPicker";
 
-interface AddListFormProps
+export interface AddListFormProps
   extends Omit<
     JSX.HTMLAttributes<HTMLFormElement>,
     "onSubmit" | "on:submit" | "onsubmit"
