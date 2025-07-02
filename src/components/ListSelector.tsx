@@ -1,9 +1,10 @@
-import { splitProps, type JSX } from "solid-js";
+import { Show, splitProps, type JSX } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import { twMerge } from "tailwind-merge";
 
+import { isRestrictedListName } from "../helpers/isRestrictedListName";
 import { AppIconKey, ICON_MAP } from "../constants";
 import type { List, ListName } from "../types";
-import { Dynamic } from "solid-js/web";
 import { IconButton } from "./IconButton";
 
 interface ListSelectorProps
@@ -32,11 +33,16 @@ export function ListSelector(props: ListSelectorProps) {
       )}
       {...buttonProps}
     >
-      <IconButton
-        class="absolute -top-2 -right-2 p-0 bg-white hidden group-hover:block"
-        iconProps={{ icon: AppIconKey.PLUS_CIRCLE, class: "rotate-45 h-5 w-5" }}
-        onClick={() => localProps.onDeleteList(localProps.list.name)}
-      />
+      <Show when={!isRestrictedListName(localProps.list.name)}>
+        <IconButton
+          class="absolute -top-2 -right-2 p-0 bg-white hidden group-hover:block"
+          iconProps={{
+            icon: AppIconKey.PLUS_CIRCLE,
+            class: "rotate-45 h-5 w-5",
+          }}
+          onClick={() => localProps.onDeleteList(localProps.list.name)}
+        />
+      </Show>
       <div class="flex justify-between items-center w-full">
         <div
           style={{ "background-color": localProps.list.color }}
