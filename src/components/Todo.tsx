@@ -1,6 +1,6 @@
 import { Show, type Component, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
-import type { Todo } from "../types";
+import { TodoKey, type Todo } from "../types";
 import { truncateText } from "../helpers/truncateText";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -18,7 +18,10 @@ export const TodoComp: Component<TodoProps> = (props) => {
         props.class,
       )}
     >
-      <span class="text-gray-300">ID:{shortenedUUID}</span>
+      <div class="flex justify-between px-2">
+        <span class="text-gray-300">ID:{shortenedUUID}</span>
+        <span>{props.todo[TodoKey.LIST]}</span>
+      </div>
       <div class="flex items-center p-2 border border-red-300">
         <input
           type="checkbox"
