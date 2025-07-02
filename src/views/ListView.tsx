@@ -3,9 +3,11 @@ import { ListSelector } from "../components/ListSelector";
 import { AppIconKey } from "../constants";
 import { Icon } from "../components/Icon";
 import { useDexie } from "../hooks";
+import type { ListName } from "../types";
 
 type ListViewProps = {
   onAddList: () => void;
+  onDeleteList: (listName: ListName) => void;
 };
 
 export function ListView(props: ListViewProps) {
@@ -22,6 +24,7 @@ export function ListView(props: ListViewProps) {
               todoCount={listsTodoCount()[list.name]}
               selected={chosenListName() === list.name}
               onClick={() => chooseList(list.name)}
+              onDeleteList={props.onDeleteList}
             />
           )}
         </For>

@@ -9,7 +9,8 @@ import {
   listsObservable,
   listTodoCountObservable,
 } from "./observables";
-import { getDependents } from "./helpers";
+import { getDependents, getTodosByListName } from "./helpers";
+import { isRestrictedListName } from "../../helpers/isRestrictedListName";
 
 export function useDexie() {
   const lists = useObservable(listsObservable, []);
@@ -29,6 +30,51 @@ export function useDexie() {
     return db.transaction("rw", db.lists, db.chosenList, async () => {
       await db.lists.add(newList);
       await db.chosenList.update(currentList, { name: newList.name });
+    });
+  }
+
+  async function deleteList(listName: ListName) {
+    if (isRestrictedListName(listName)) {
+      throw new Error("unable to delete restricted list name");
+    }
+
+    const listTodos = await getTodosByListName(
+      listName,
+      "keepCompleted",
+    ).toArray();
+
+    return db.transaction("rw", db.lists, db.todos, () => {
+      // delete the list
+      db.lists.delete(listName);
+
+      // delete all the todos within that list, update todos that are either dependent
+      // or depended on if they are not within that list
+      const updatedTodosTransactions = listTodos.map(async (todo) => {
+        const { dependentTodo, dependsOnTodo } = await getDependents(todo);
+        const now = Date.now();
+
+        db.todos.delete(todo.id);
+        if (
+          dependsOnTodo &&
+          dependsOnTodo[TodoKey.LIST] !== todo[TodoKey.LIST]
+        ) {
+          await db.todos.update(dependsOnTodo, {
+            updatedAt: now,
+            dependent: undefined,
+          });
+        }
+        if (
+          dependentTodo &&
+          dependentTodo[TodoKey.LIST] !== todo[TodoKey.LIST]
+        ) {
+          await db.todos.update(dependentTodo, {
+            updatedAt: now,
+            dependsOn: undefined,
+          });
+        }
+      });
+
+      return Promise.all(updatedTodosTransactions);
     });
   }
 
@@ -101,6 +147,7 @@ export function useDexie() {
     handleTodoCheck,
     addList,
     chooseList,
+    deleteList,
   };
 
   return [dexieState, dexieMethods] as const;
