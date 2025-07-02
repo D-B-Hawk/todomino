@@ -1,10 +1,11 @@
 import { createSignal, Show } from "solid-js";
-import { useToggle } from "./hooks";
+import { useDexie, useToggle } from "./hooks";
 import { ListView } from "./views/ListView";
 import { TodosView } from "./views/TodosView";
 import { Modal } from "./components/Modal";
 import { AddListForm } from "./components/AddListForm";
 import { ConfirmListDelete } from "./components/ConfirmListDelete";
+import type { ListName } from "./types";
 
 enum ListAction {
   ADD_LIST = "addList",
@@ -16,12 +17,26 @@ export function App() {
   const [modalContent, setModalContent] = createSignal<ListAction>(
     ListAction.ADD_LIST,
   );
+  const [listToDelete, setListToDelete] = createSignal<ListName>();
+
+  const [, { deleteList }] = useDexie();
 
   function handleListDelete() {
-    toggleModal();
+    const doomedList = listToDelete();
+    if (!doomedList) {
+      console.error("no list to delete");
+      return;
+    }
+
+    deleteList(doomedList)
+      .then(toggleModal)
+      .catch((error) => console.error(error));
   }
 
-  function handleListAction(action: ListAction) {
+  function handleListAction(action: ListAction, listName?: ListName) {
+    if (listName) {
+      setListToDelete(listName);
+    }
     setModalContent(action);
     toggleModal();
   }
@@ -31,7 +46,9 @@ export function App() {
       <div class="flex h-screen max-h-screen overflow-hidden">
         <ListView
           onAddList={() => handleListAction(ListAction.ADD_LIST)}
-          onDeleteList={() => handleListAction(ListAction.DELETE_LIST)}
+          onDeleteList={(listName) =>
+            handleListAction(ListAction.DELETE_LIST, listName)
+          }
         />
         <TodosView />
       </div>
