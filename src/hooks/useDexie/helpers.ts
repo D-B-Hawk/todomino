@@ -1,7 +1,10 @@
 import { db, getTodosWhereKey } from "../../db";
 import { TodoKey, type ListName, type Todo } from "../../types";
 
-export function getTodosByListName(listName: ListName) {
+export function getTodosByListName(
+  listName: ListName,
+  completionType: "removeCompleted" | "keepCompleted" = "removeCompleted",
+) {
   if (listName === "completed") {
     return getTodosWhereKey(TodoKey.COMPLETED_AT).above(0);
   }
@@ -11,9 +14,11 @@ export function getTodosByListName(listName: ListName) {
       .or(TodoKey.DEPENDS_ON)
       .notEqual("");
   }
-  return getTodosWhereKey(TodoKey.LIST)
-    .equals(listName)
-    .and((todo) => !todo.completedAt);
+  let todos = getTodosWhereKey(TodoKey.LIST).equals(listName);
+  if (completionType === "removeCompleted") {
+    todos = todos.and((todo) => !todo.completedAt);
+  }
+  return todos;
 }
 
 export async function getDependents(todo: Todo) {
