@@ -1,11 +1,12 @@
 import { createSignal, Show } from "solid-js";
-import { useDexie, useToggle } from "./hooks";
+import { useToggle } from "./hooks";
 import { ListView } from "./views/ListView";
 import { TodosView } from "./views/TodosView";
 import { Modal } from "./components/Modal";
 import { AddListForm } from "./components/AddListForm";
 import { ConfirmListDelete } from "./components/ConfirmListDelete";
 import type { ListName } from "./types";
+import { useDexieCtx } from "./context/Dexie/DexieCtx";
 
 enum ListAction {
   ADD_LIST = "addList",
@@ -19,7 +20,7 @@ export function App() {
   );
   const [listToDelete, setListToDelete] = createSignal<ListName>();
 
-  const [, { deleteList }] = useDexie();
+  const [, { deleteList }] = useDexieCtx();
 
   function handleListDelete() {
     const doomedList = listToDelete();

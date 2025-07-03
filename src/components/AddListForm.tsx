@@ -5,10 +5,11 @@ import { TextField } from "./TextField";
 import { AppIconKey, ICON_KEYS, IconKey } from "../constants";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
-import { useDexie, useOnClickOutside } from "../hooks";
+import { useOnClickOutside } from "../hooks";
 import type { FormSubmitEvent } from "../types";
 import { getFormData } from "../helpers/getFormData";
 import { ColorPicker, PickerColor } from "./ColorPicker";
+import { useDexieCtx } from "../context/Dexie/DexieCtx";
 
 export interface AddListFormProps
   extends Omit<
@@ -34,7 +35,7 @@ export function AddListForm(props: AddListFormProps) {
 
   useOnClickOutside(() => formRef, local.onOutsideFormClick);
 
-  const [{ lists }, { addList }] = useDexie();
+  const [{ lists }, { addList }] = useDexieCtx();
 
   const LIST_FORM_SCHEMA = z.object({
     name: z

@@ -2,8 +2,8 @@ import { For } from "solid-js";
 import { ListSelector } from "../components/ListSelector";
 import { AppIconKey } from "../constants";
 import { Icon } from "../components/Icon";
-import { useDexie } from "../hooks";
 import type { ListName } from "../types";
+import { useDexieCtx } from "../context/Dexie/DexieCtx";
 
 type ListViewProps = {
   onAddList: () => void;
@@ -12,7 +12,7 @@ type ListViewProps = {
 
 export function ListView(props: ListViewProps) {
   const [{ lists, listsTodoCount, chosenListName }, { chooseList }] =
-    useDexie();
+    useDexieCtx();
 
   return (
     <div class="flex flex-col items-center justify-between p-4 gap-4 w-96 overflow-y-auto">

@@ -1,9 +1,9 @@
 import { liveQuery } from "dexie";
 import { db, sortTodosByKey, type ChosenList } from "../../db";
-import { getTodosByListName } from "./helpers";
+import { getTodosByListName } from "../../context/Dexie/helpers";
 import { TodoKey, type ListName } from "../../types";
 
-type ListTodoCount = Record<ListName, number>;
+export type ListTodoCount = Record<ListName, number>;
 
 export const INIT_LIST_TODO_COUNT: ListTodoCount = {
   completed: 0,
