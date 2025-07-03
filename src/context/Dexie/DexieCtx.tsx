@@ -15,7 +15,7 @@ import {
 } from "./observables";
 import { createList, type CreateListArgs } from "../../helpers/createList";
 import { db } from "../../db";
-import { TodoKey, type List, type ListName, type Todo } from "../../types";
+import { type List, type ListName, type Todo } from "../../types";
 import { isRestrictedListName } from "../../helpers/isRestrictedListName";
 import { getDependents, getTodosByListName } from "./helpers";
 
@@ -79,19 +79,13 @@ export function DexieProvider(props: ParentProps) {
         const now = Date.now();
 
         db.todos.delete(todo.id);
-        if (
-          dependsOnTodo &&
-          dependsOnTodo[TodoKey.LIST] !== todo[TodoKey.LIST]
-        ) {
+        if (dependsOnTodo && dependsOnTodo.list !== todo.list) {
           await db.todos.update(dependsOnTodo, {
             updatedAt: now,
             dependent: undefined,
           });
         }
-        if (
-          dependentTodo &&
-          dependentTodo[TodoKey.LIST] !== todo[TodoKey.LIST]
-        ) {
+        if (dependentTodo && dependentTodo.list !== todo.list) {
           await db.todos.update(dependentTodo, {
             updatedAt: now,
             dependsOn: undefined,
@@ -131,7 +125,7 @@ export function DexieProvider(props: ParentProps) {
   async function handleTodoCheck(checked: boolean, todo: Todo) {
     // in the case of debouncing it is possible for nothing to change
     // for that situation return
-    if (checked === !!todo[TodoKey.COMPLETED_AT]) {
+    if (checked === !!todo.completedAt) {
       return;
     }
     const { dependentTodo, dependsOnTodo } = await getDependents(todo);
@@ -148,13 +142,13 @@ export function DexieProvider(props: ParentProps) {
       if (dependsOnTodo) {
         await db.todos.update(dependsOnTodo, {
           updatedAt: now,
-          dependent: dependentTodo?.[TodoKey.ID], // if the todo also had a dependent. transfer that dependent to its dependsOn
+          dependent: dependentTodo?.id, // if the todo also had a dependent. transfer that dependent to its dependsOn
         });
       }
       if (dependentTodo) {
         await db.todos.update(dependentTodo, {
           updatedAt: now,
-          dependsOn: dependsOnTodo?.[TodoKey.ID], // transfer the dependsOn todo to the child if present
+          dependsOn: dependsOnTodo?.id, // transfer the dependsOn todo to the child if present
         });
       }
     });

@@ -1,20 +1,20 @@
 import { db, getTodosWhereKey } from "../../db";
-import { TodoKey, type ListName, type Todo } from "../../types";
+import { type ListName, type Todo } from "../../types";
 
 export function getTodosByListName(
   listName: ListName,
   completionType: "removeCompleted" | "keepCompleted" = "removeCompleted",
 ) {
   if (listName === "completed") {
-    return getTodosWhereKey(TodoKey.COMPLETED_AT).above(0);
+    return getTodosWhereKey("completedAt").above(0);
   }
   if (listName === "todomino") {
-    return getTodosWhereKey(TodoKey.DEPENDENT)
+    return getTodosWhereKey("dependent")
       .notEqual("")
-      .or(TodoKey.DEPENDS_ON)
+      .or("dependsOn") // TODO: Loose. needs key enforcement
       .notEqual("");
   }
-  let todos = getTodosWhereKey(TodoKey.LIST).equals(listName);
+  let todos = getTodosWhereKey("list").equals(listName);
   if (completionType === "removeCompleted") {
     todos = todos.and((todo) => !todo.completedAt);
   }

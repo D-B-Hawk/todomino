@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
 import { TodoComp } from "../components/Todo";
-import { TodoKey, type FormSubmitEvent, type Todo } from "../types";
+import { type FormSubmitEvent, type Todo } from "../types";
 import { TodoForm } from "../components/TodoForm";
 import type { SelectOption } from "../components/SelectInput";
 import { useAsyncDebounce } from "../hooks";
@@ -41,10 +41,10 @@ export function TodosView() {
   // currently have no todo that is dependent on it
   const availableDependentOptions = () =>
     chosenListTodos().reduce<SelectOption[]>((prev, cur) => {
-      if (!cur[TodoKey.DEPENDENT]) {
+      if (!cur.dependent) {
         prev.push({
-          id: cur[TodoKey.ID],
-          value: cur[TodoKey.DESCRIPTION],
+          id: cur.id,
+          value: cur.description,
         });
       }
       return prev;
