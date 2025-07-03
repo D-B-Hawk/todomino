@@ -2,12 +2,13 @@ import Dexie, { type EntityTable } from "dexie";
 import { type List, type ListName, type Todo } from "../types";
 import { INIT_LIST_NAMES, READONLY_LIST_NAMES } from "../constants";
 import { createList } from "../helpers/createList";
+import { typedTable } from "./helpers";
 
 export type ChosenList = {
   name: ListName;
 };
 
-type TodosDBTable = {
+export type TodosDBTable = {
   todos: EntityTable<Todo, "id">;
   lists: EntityTable<List, "name">;
   chosenList: EntityTable<ChosenList, "name">;
@@ -35,10 +36,8 @@ const dbSchema: Record<keyof TodosDBTable, string> = {
 // Schema declaration:
 db.version(1).stores(dbSchema);
 
-// TOD0: Enforce using only known tablenames on transactions.
 db.on("populate", function (transaction) {
-  transaction
-    .table("lists") // I no likey this
+  typedTable("lists", transaction)
     .bulkAdd(
       [...INIT_LIST_NAMES, ...READONLY_LIST_NAMES].map((list) =>
         createList({ name: list }),
@@ -49,6 +48,6 @@ db.on("populate", function (transaction) {
     .catch((error) =>
       console.error("failed to initiliaze db with known lists", error),
     );
-  // or this
-  transaction.table("chosenList").add({ name: "reminders" });
+
+  typedTable("chosenList", transaction).add({ name: "reminders" });
 });

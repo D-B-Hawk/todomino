@@ -1,4 +1,5 @@
 import { db, getTodosWhereKey } from "../../db";
+import { orWhereIndexOrPrimary } from "../../db/helpers";
 import { type ListName, type Todo } from "../../types";
 
 export function getTodosByListName(
@@ -9,11 +10,11 @@ export function getTodosByListName(
     return getTodosWhereKey("completedAt").above(0);
   }
   if (listName === "todomino") {
-    return getTodosWhereKey("dependent")
-      .notEqual("")
-      .or("dependsOn") // TODO: Loose. needs key enforcement
-      .notEqual("");
+    const withDependent = getTodosWhereKey("dependent").notEqual("");
+
+    return orWhereIndexOrPrimary("dependsOn", withDependent).notEqual("");
   }
+
   let todos = getTodosWhereKey("list").equals(listName);
   if (completionType === "removeCompleted") {
     todos = todos.and((todo) => !todo.completedAt);
