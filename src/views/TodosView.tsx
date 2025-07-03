@@ -3,17 +3,18 @@ import { TodoComp } from "../components/Todo";
 import { TodoKey, type FormSubmitEvent, type Todo } from "../types";
 import { TodoForm } from "../components/TodoForm";
 import type { SelectOption } from "../components/SelectInput";
-import { useAsyncDebounce, useDexie } from "../hooks";
+import { useAsyncDebounce } from "../hooks";
 import { isRestrictedListName } from "../helpers/isRestrictedListName";
 import { getFormData } from "../helpers/getFormData";
 import { TODO_FORM_SCHEMA } from "../constants";
 import { createTodo } from "../helpers/createTodo";
+import { useDexieCtx } from "../context/Dexie/DexieCtx";
 
 export function TodosView() {
   const [
     { lists, chosenListTodos, chosenListName },
     { addTodo, handleTodoCheck },
-  ] = useDexie();
+  ] = useDexieCtx();
 
   // returns  an array of select options for lists
   // that are not readonly

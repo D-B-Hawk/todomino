@@ -1,24 +1,49 @@
-import { type ListName, type Todo, TodoKey } from "../../types";
-import { db } from "../../db";
-import { useObservable } from "../useObservable";
-import { createList, type CreateListArgs } from "../../helpers/createList";
+import {
+  createContext,
+  useContext,
+  type Accessor,
+  type ParentProps,
+} from "solid-js";
+import { useObservable } from "../../hooks";
 import {
   chosenListNameObservable,
   chosenListTodosObservable,
   INIT_LIST_TODO_COUNT,
   listsObservable,
   listTodoCountObservable,
+  type ListTodoCount,
 } from "./observables";
-import { getDependents, getTodosByListName } from "./helpers";
+import { createList, type CreateListArgs } from "../../helpers/createList";
+import { db } from "../../db";
+import { TodoKey, type List, type ListName, type Todo } from "../../types";
 import { isRestrictedListName } from "../../helpers/isRestrictedListName";
+import { getDependents, getTodosByListName } from "./helpers";
 
-export function useDexie() {
+type DexieState = [
+  {
+    lists: Accessor<List[]>;
+    listsTodoCount: Accessor<ListTodoCount>;
+    chosenListTodos: Accessor<Todo[]>;
+    chosenListName: Accessor<ListName | undefined>;
+  },
+  {
+    addTodo: (todo: Todo) => Promise<void>;
+    handleTodoCheck: (checked: boolean, todo: Todo) => Promise<void>;
+    addList: (args: CreateListArgs) => Promise<void>;
+    chooseList: (listName: ListName) => void;
+    deleteList: (listName: ListName) => Promise<void[]>;
+  },
+];
+
+export const DexieCtx = createContext<DexieState>();
+
+export function DexieProvider(props: ParentProps) {
   const lists = useObservable(listsObservable, []);
   const chosenListTodos = useObservable(chosenListTodosObservable, []);
+  const chosenListName = useObservable(chosenListNameObservable, "reminders");
   const listsTodoCount = useObservable(listTodoCountObservable, {
     ...INIT_LIST_TODO_COUNT,
   });
-  const chosenListName = useObservable(chosenListNameObservable, "reminders");
 
   async function addList(args: CreateListArgs) {
     const currentList = chosenListName();
@@ -150,5 +175,17 @@ export function useDexie() {
     deleteList,
   };
 
-  return [dexieState, dexieMethods] as const;
+  return (
+    <DexieCtx.Provider value={[dexieState, dexieMethods]}>
+      {props.children}
+    </DexieCtx.Provider>
+  );
+}
+
+export function useDexieCtx() {
+  const listCtx = useContext(DexieCtx);
+  if (!listCtx) {
+    throw new Error("useListCtx must be used within a DexieCtx.Provider");
+  }
+  return listCtx;
 }
