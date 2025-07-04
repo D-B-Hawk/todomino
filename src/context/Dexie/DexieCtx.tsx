@@ -139,16 +139,16 @@ export function DexieProvider(props: ParentProps) {
         dependsOn: undefined,
         completedAt,
       });
-      if (dependsOnTodo) {
+      if (dependsOnTodo && dependentTodo?.id) {
         await db.todos.update(dependsOnTodo, {
           updatedAt: now,
-          dependent: dependentTodo?.id, // if the todo also had a dependent. transfer that dependent to its dependsOn
+          dependent: dependentTodo.id, // if the todo also had a dependent. transfer that dependent to its dependsOn
         });
       }
-      if (dependentTodo) {
+      if (dependentTodo && dependsOnTodo) {
         await db.todos.update(dependentTodo, {
           updatedAt: now,
-          dependsOn: dependsOnTodo?.id, // transfer the dependsOn todo to the child if present
+          dependsOn: dependsOnTodo.id, // transfer the dependsOn todo to the child if present
         });
       }
     });
