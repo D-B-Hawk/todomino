@@ -10,7 +10,7 @@ export function IconButton(props: IconButtonProps) {
   const [local, buttonProps] = splitProps(props, ["iconProps", "class"]);
   return (
     <button
-      class={twMerge("border p-2 rounded-full", local.class)}
+      class={twMerge("rounded-full", local.class)}
       type="button"
       {...buttonProps}
     >

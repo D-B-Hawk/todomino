@@ -91,7 +91,7 @@ export function AddListForm(props: AddListFormProps) {
         class="border p-2 h-fit w-fit rounded-full self-center"
         style={{ "background-color": iconColor() }}
       >
-        <Icon icon={iconKey()} />
+        <Icon icon={iconKey()} class="stroke-white" />
       </div>
       <label class="flex gap-2 items-center">
         Name:
@@ -111,7 +111,8 @@ export function AddListForm(props: AddListFormProps) {
               <IconButton
                 onClick={() => setIconKey(key)}
                 style={{ "background-color": iconColor() }}
-                iconProps={{ icon: key }}
+                class="p-2"
+                iconProps={{ icon: key, stroke: "white" }}
               />
             )}
           </For>
