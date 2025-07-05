@@ -179,7 +179,7 @@ export function DexieProvider(props: ParentProps) {
 export function useDexieCtx() {
   const listCtx = useContext(DexieCtx);
   if (!listCtx) {
-    throw new Error("useListCtx must be used within a DexieCtx.Provider");
+    throw new Error("useDexieCtx must be used within a DexieCtx.Provider");
   }
   return listCtx;
 }

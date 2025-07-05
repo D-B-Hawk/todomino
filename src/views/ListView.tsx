@@ -3,7 +3,7 @@ import { ListSelector } from "../components/ListSelector";
 import { AppIconKey } from "../constants";
 import { Icon } from "../components/Icon";
 import type { ListName } from "../types";
-import { useDexieCtx } from "../context/Dexie/DexieCtx";
+import { useDexieCtx } from "../context/dexie/DexieCtx";
 
 type ListViewProps = {
   onAddList: () => void;
