@@ -6,7 +6,8 @@ import { Modal } from "./components/Modal";
 import { AddListForm } from "./components/AddListForm";
 import { ConfirmListDelete } from "./components/ConfirmListDelete";
 import type { ListName } from "./types";
-import { useDexieCtx } from "./context/Dexie/DexieCtx";
+import { useDexieCtx } from "./context/dexie/DexieCtx";
+import { useMatchMedia } from "./hooks/useMatchMedia";
 
 enum ListAction {
   ADD_LIST = "addList",
@@ -14,6 +15,7 @@ enum ListAction {
 }
 
 export function App() {
+  const prefersDarkTheme = useMatchMedia("(prefers-color-scheme: dark)");
   const [showModal, { toggle: toggleModal }] = useToggle();
   const [modalContent, setModalContent] = createSignal<ListAction>(
     ListAction.ADD_LIST,
@@ -43,8 +45,8 @@ export function App() {
   }
 
   return (
-    <>
-      <div class="flex h-screen max-h-screen overflow-hidden">
+    <div class={prefersDarkTheme() ? "dark" : ""}>
+      <div class="flex h-screen max-h-screen overflow-hidden dark:bg-black">
         <ListView
           onAddList={() => handleListAction(ListAction.ADD_LIST)}
           onDeleteList={(listName) =>
@@ -68,6 +70,6 @@ export function App() {
           />
         </Show>
       </Modal>
-    </>
+    </div>
   );
 }
