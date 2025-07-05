@@ -8,7 +8,7 @@ import { isRestrictedListName } from "../helpers/isRestrictedListName";
 import { getFormData } from "../helpers/getFormData";
 import { TODO_FORM_SCHEMA } from "../constants";
 import { createTodo } from "../helpers/createTodo";
-import { useDexieCtx } from "../context/Dexie/DexieCtx";
+import { useDexieCtx } from "../context/dexie/DexieCtx";
 
 export function TodosView() {
   const [

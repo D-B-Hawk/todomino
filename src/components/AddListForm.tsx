@@ -9,7 +9,7 @@ import { useOnClickOutside } from "../hooks";
 import type { FormSubmitEvent } from "../types";
 import { getFormData } from "../helpers/getFormData";
 import { ColorPicker, PickerColor } from "./ColorPicker";
-import { useDexieCtx } from "../context/Dexie/DexieCtx";
+import { useDexieCtx } from "../context/dexie/DexieCtx";
 
 export interface AddListFormProps
   extends Omit<
