@@ -2,14 +2,14 @@ import { createSignal, For, splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod/v4";
 import { TextField } from "./TextField";
-import { AppIconKey, ICON_KEYS, IconKey } from "../constants";
+import { AppIconKey, ICON_KEYS, IconKey } from "@/constants";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
-import { useOnClickOutside } from "../hooks";
-import type { FormSubmitEvent } from "../types";
-import { getFormData } from "../helpers/getFormData";
+import { useOnClickOutside } from "@/hooks";
+import type { FormSubmitEvent } from "@/types";
+import { getFormData } from "@/helpers/getFormData";
 import { ColorPicker, PickerColor } from "./ColorPicker";
-import { useDexieCtx } from "../context/dexie/DexieCtx";
+import { useDexieCtx } from "@/context";
 
 export interface AddListFormProps
   extends Omit<

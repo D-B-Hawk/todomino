@@ -1,7 +1,7 @@
 import { Show, type Component, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
-import { type Todo } from "../types";
-import { truncateText } from "../helpers/truncateText";
+import { type Todo } from "@/types";
+import { truncateText } from "@/helpers";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;

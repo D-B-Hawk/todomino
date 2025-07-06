@@ -1,6 +1,6 @@
 import { splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
-import { useOnClickOutside } from "../hooks";
+import { useOnClickOutside } from "@/hooks";
 
 export interface ConfirmListDeleteProps
   extends JSX.HTMLAttributes<HTMLDivElement> {

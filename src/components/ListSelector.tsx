@@ -2,11 +2,11 @@ import { Show, splitProps, type JSX } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { twMerge } from "tailwind-merge";
 
-import { isRestrictedListName } from "../helpers/isRestrictedListName";
-import { AppIconKey, ICON_MAP } from "../constants";
-import type { List, ListName } from "../types";
+import { isRestrictedListName } from "@/helpers";
+import { AppIconKey, ICON_MAP } from "@/constants";
+import type { List, ListName } from "@/types";
 import { IconButton } from "./IconButton";
-import { SILVERBACK } from "../constants/colors";
+import { SILVERBACK } from "@/constants/colors";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {

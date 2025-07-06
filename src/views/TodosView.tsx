@@ -1,14 +1,10 @@
 import { For, Show } from "solid-js";
-import { TodoComp } from "../components/Todo";
-import { type FormSubmitEvent, type Todo } from "../types";
-import { TodoForm } from "../components/TodoForm";
-import type { SelectOption } from "../components/SelectInput";
-import { useAsyncDebounce } from "../hooks";
-import { isRestrictedListName } from "../helpers/isRestrictedListName";
-import { getFormData } from "../helpers/getFormData";
-import { TODO_FORM_SCHEMA } from "../constants";
-import { createTodo } from "../helpers/createTodo";
-import { useDexieCtx } from "../context/dexie/DexieCtx";
+import type { FormSubmitEvent, Todo } from "@/types";
+import { useDexieCtx } from "@/context";
+import { useAsyncDebounce } from "@/hooks";
+import { TODO_FORM_SCHEMA } from "@/constants";
+import { isRestrictedListName, getFormData, createTodo } from "@/helpers";
+import { TodoComp, TodoForm, type SelectOption } from "@/components";
 
 export function TodosView() {
   const [

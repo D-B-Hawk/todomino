@@ -1,5 +1,5 @@
 import type { Collection, InsertType, Table, Transaction } from "dexie";
-import type { Todo } from "../types";
+import type { Todo } from "@/types";
 import { db, type TodosDBTable } from "./db";
 
 export function getTodosWhereKey<K extends keyof Todo | Array<keyof Todo>>(
