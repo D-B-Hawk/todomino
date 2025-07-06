@@ -23,6 +23,9 @@
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@*": ["./src/*"]
+    },
     "types": ["vite-plugin-solid-svg/types-component-solid", "vite/client"]
   },
 
