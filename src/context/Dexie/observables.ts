@@ -1,7 +1,7 @@
 import { liveQuery } from "dexie";
-import { db, sortTodosByKey, type ChosenList } from "../../db";
+import { db, sortTodosByKey, type ChosenList } from "@/db";
 import { getTodosByListName } from "./helpers";
-import { type ListName } from "../../types";
+import { type ListName } from "@/types";
 
 export type ListTodoCount = Record<ListName, number>;
 

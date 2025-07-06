@@ -1,6 +1,5 @@
-import { db, getTodosWhereKey } from "../../db";
-import { orWhereIndexOrPrimary } from "../../db/helpers";
-import { type ListName, type Todo } from "../../types";
+import { db, getTodosWhereKey, orWhereIndexOrPrimary } from "@/db";
+import { type ListName, type Todo } from "@/types";
 
 export function getTodosByListName(
   listName: ListName,

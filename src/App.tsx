@@ -1,13 +1,9 @@
 import { createSignal, Show } from "solid-js";
-import { useToggle } from "./hooks";
-import { ListView } from "./views/ListView";
-import { TodosView } from "./views/TodosView";
-import { Modal } from "./components/Modal";
-import { AddListForm } from "./components/AddListForm";
-import { ConfirmListDelete } from "./components/ConfirmListDelete";
-import type { ListName } from "./types";
-import { useDexieCtx } from "./context/dexie/DexieCtx";
-import { useMatchMedia } from "./hooks/useMatchMedia";
+import { useToggle, useMatchMedia } from "@/hooks";
+import { ListView, TodosView } from "@/views";
+import { Modal, AddListForm, ConfirmListDelete } from "@/components";
+import type { ListName } from "@/types";
+import { useDexieCtx } from "@/context";
 
 enum ListAction {
   ADD_LIST = "addList",

@@ -1,9 +1,8 @@
 import { For } from "solid-js";
-import { ListSelector } from "../components/ListSelector";
-import { AppIconKey } from "../constants";
-import { Icon } from "../components/Icon";
-import type { ListName } from "../types";
-import { useDexieCtx } from "../context/dexie/DexieCtx";
+import type { ListName } from "@/types";
+import { AppIconKey } from "@/constants";
+import { ListSelector, Icon } from "@/components";
+import { useDexieCtx } from "@/context";
 
 type ListViewProps = {
   onAddList: () => void;

@@ -4,7 +4,7 @@ import {
   type Accessor,
   type ParentProps,
 } from "solid-js";
-import { useObservable } from "../../hooks";
+import { useObservable } from "@/hooks";
 import {
   chosenListNameObservable,
   chosenListTodosObservable,
@@ -13,10 +13,13 @@ import {
   listTodoCountObservable,
   type ListTodoCount,
 } from "./observables";
-import { createList, type CreateListArgs } from "../../helpers/createList";
-import { db } from "../../db";
-import { type List, type ListName, type Todo } from "../../types";
-import { isRestrictedListName } from "../../helpers/isRestrictedListName";
+import {
+  createList,
+  type CreateListArgs,
+  isRestrictedListName,
+} from "@/helpers";
+import { db } from "@/db";
+import { type List, type ListName, type Todo } from "@/types";
 import { getDependents, getTodosByListName } from "./helpers";
 
 type DexieState = [

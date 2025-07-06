@@ -1,5 +1,5 @@
 import { IconKey } from "../constants";
-import type { List } from "../types";
+import type { List } from "@/types";
 
 export type CreateListArgs = Partial<Pick<List, "name" | "color" | "icon">>;
 

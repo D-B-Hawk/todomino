@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
-import { type List, type ListName, type Todo } from "../types";
-import { INIT_LIST_NAMES, READONLY_LIST_NAMES } from "../constants";
-import { createList } from "../helpers/createList";
+import { type List, type ListName, type Todo } from "@/types";
+import { INIT_LIST_NAMES, READONLY_LIST_NAMES } from "@/constants";
+import { createList } from "@/helpers";
 import { typedTable } from "./helpers";
 
 export type ChosenList = {

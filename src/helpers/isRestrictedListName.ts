@@ -1,5 +1,5 @@
-import { READONLY_LIST_NAMES } from "../constants";
-import type { ListName, RestrictedListName } from "../types";
+import { READONLY_LIST_NAMES } from "@/constants";
+import type { ListName, RestrictedListName } from "@/types";
 
 export function isRestrictedListName(
   listName: ListName | undefined,
