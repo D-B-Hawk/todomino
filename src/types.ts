@@ -1,5 +1,10 @@
 import type { DOMElement } from "solid-js/jsx-runtime";
-import { IconKey, INIT_LIST_NAMES, READONLY_LIST_NAMES } from "./constants";
+import {
+  IconKey,
+  INIT_LIST_NAMES,
+  PICKER_COLORS,
+  READONLY_LIST_NAMES,
+} from "./constants";
 
 export type RestrictedListName = (typeof READONLY_LIST_NAMES)[number];
 export type InitalListName = (typeof INIT_LIST_NAMES)[number];
@@ -40,3 +45,5 @@ export type ListCount = {
   list: List;
   todoCount: number;
 };
+
+export type PickerColor = keyof typeof PICKER_COLORS;
