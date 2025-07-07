@@ -2,13 +2,13 @@ import { createSignal, For, splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod/v4";
 import { TextField } from "./TextField";
-import { AppIconKey, ICON_KEYS, IconKey } from "@/constants";
+import { AppIconKey, ICON_KEYS, IconKey, PICKER_COLORS } from "@/constants";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
 import { useOnClickOutside } from "@/hooks";
-import type { FormSubmitEvent } from "@/types";
+import type { FormSubmitEvent, PickerColor } from "@/types";
 import { getFormData } from "@/helpers/getFormData";
-import { ColorPicker, PickerColor } from "./ColorPicker";
+import { ColorPicker } from "./ColorPicker";
 import { useDexieCtx } from "@/context";
 
 export interface AddListFormProps
@@ -29,7 +29,7 @@ export function AddListForm(props: AddListFormProps) {
     "onFormSubmitSuccess",
   ]);
   const [iconKey, setIconKey] = createSignal<IconKey>(IconKey.BOX);
-  const [iconColor, setIconColor] = createSignal<PickerColor>(PickerColor.BLUE);
+  const [iconColor, setIconColor] = createSignal<PickerColor>("BLUE");
 
   let formRef: HTMLFormElement | undefined;
 
@@ -45,7 +45,7 @@ export function AddListForm(props: AddListFormProps) {
         error: "list name is taken",
       }),
     icon: z.enum(IconKey),
-    color: z.enum(PickerColor),
+    color: z.string(),
   });
 
   function handleListFormSubmit(event: FormSubmitEvent) {
@@ -89,7 +89,7 @@ export function AddListForm(props: AddListFormProps) {
       </button>
       <div
         class="border p-2 h-fit w-fit rounded-full self-center"
-        style={{ "background-color": iconColor() }}
+        style={{ "background-color": PICKER_COLORS[iconColor()] }}
       >
         <Icon icon={iconKey()} class="stroke-white" />
       </div>
@@ -110,7 +110,7 @@ export function AddListForm(props: AddListFormProps) {
             {(key) => (
               <IconButton
                 onClick={() => setIconKey(key)}
-                style={{ "background-color": iconColor() }}
+                style={{ "background-color": PICKER_COLORS[iconColor()] }}
                 class="p-2"
                 iconProps={{ icon: key, stroke: "white" }}
               />
