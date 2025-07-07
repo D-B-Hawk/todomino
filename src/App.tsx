@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { useToggle, useMatchMedia } from "@/hooks";
+import { useToggle } from "@/hooks";
 import { ListView, TodosView } from "@/views";
 import { Modal, AddListForm, ConfirmListDelete } from "@/components";
 import type { ListName } from "@/types";
@@ -11,7 +11,6 @@ enum ListAction {
 }
 
 export function App() {
-  const prefersDarkTheme = useMatchMedia("(prefers-color-scheme: dark)");
   const [showModal, { toggle: toggleModal }] = useToggle();
   const [modalContent, setModalContent] = createSignal<ListAction>(
     ListAction.ADD_LIST,
@@ -41,7 +40,7 @@ export function App() {
   }
 
   return (
-    <div class={prefersDarkTheme() ? "dark" : ""}>
+    <>
       <div class="flex h-screen max-h-screen overflow-hidden dark:bg-black">
         <ListView
           onAddList={() => handleListAction(ListAction.ADD_LIST)}
@@ -66,6 +65,6 @@ export function App() {
           />
         </Show>
       </Modal>
-    </div>
+    </>
   );
 }
