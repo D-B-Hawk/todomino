@@ -6,7 +6,6 @@ import { isRestrictedListName } from "@/helpers";
 import { AppIconKey, ICON_MAP } from "@/constants";
 import type { List, ListName } from "@/types";
 import { IconButton } from "./IconButton";
-import { SILVERBACK } from "@/constants/colors";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,7 +34,7 @@ export function ListSelector(props: ListSelectorProps) {
       style={{
         "background-color": localProps.selected
           ? localProps.list.color
-          : SILVERBACK,
+          : "var(--color-silverback)",
       }}
       {...buttonProps}
     >
