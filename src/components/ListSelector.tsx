@@ -2,10 +2,11 @@ import { Show, splitProps, type JSX } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { twMerge } from "tailwind-merge";
 
-import { isRestrictedListName } from "@/helpers";
-import { AppIconKey, ICON_MAP } from "@/constants";
+import { isConstantListName } from "@/helpers";
 import type { List, ListName } from "@/types";
 import { IconButton } from "./IconButton";
+import { ICON_MAP } from "@/constants/icons";
+import { PICKER_COLORS } from "@/constants/colors";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,18 +34,18 @@ export function ListSelector(props: ListSelectorProps) {
       )}
       style={{
         "background-color": localProps.selected
-          ? localProps.list.color
+          ? PICKER_COLORS[localProps.list.color]
           : "var(--color-silverback)",
       }}
       {...buttonProps}
     >
-      <Show when={!isRestrictedListName(localProps.list.name)}>
+      <Show when={!isConstantListName(localProps.list.name)}>
         <IconButton
           class="absolute -top-2 -right-2 p-0 hidden group-hover:block"
           iconProps={{
-            icon: AppIconKey.PLUS_CIRCLE,
+            icon: "PLUS_CIRCLE",
             class: "rotate-45 h-5 w-5 rounded-full stroke-white",
-            style: { "background-color": localProps.list.color },
+            style: { "background-color": PICKER_COLORS[localProps.list.color] },
           }}
           onClick={() => localProps.onDeleteList(localProps.list.name)}
         />
@@ -54,14 +55,16 @@ export function ListSelector(props: ListSelectorProps) {
           style={{
             "background-color": localProps.selected
               ? "white"
-              : localProps.list.color,
+              : PICKER_COLORS[localProps.list.color],
           }}
           class="p-1 rounded-full"
         >
           <Dynamic
             component={ICON_MAP[localProps.list.icon]}
             style={{
-              stroke: localProps.selected ? localProps.list.color : "white",
+              stroke: localProps.selected
+                ? PICKER_COLORS[localProps.list.color]
+                : "white",
             }}
           />
         </div>

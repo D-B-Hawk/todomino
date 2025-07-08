@@ -1,6 +1,5 @@
 import { For } from "solid-js";
 import type { ListName } from "@/types";
-import { AppIconKey } from "@/constants";
 import { ListSelector, Icon } from "@/components";
 import { useDexieCtx } from "@/context";
 
@@ -29,7 +28,7 @@ export function ListView(props: ListViewProps) {
         </For>
       </div>
       <button onClick={props.onAddList} class="flex gap-2 self-start">
-        <Icon icon={AppIconKey.PLUS_CIRCLE} class="w-6 h-6" />
+        <Icon icon="PLUS_CIRCLE" class="w-6 h-6" />
         <span>Add List</span>
       </button>
     </div>

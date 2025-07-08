@@ -2,14 +2,15 @@ import { createSignal, For, splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod/v4";
 import { TextField } from "./TextField";
-import { AppIconKey, ICON_KEYS, IconKey, PICKER_COLORS } from "@/constants";
+import { COLOR_PICKER_KEYS, PICKER_COLORS } from "@/constants/colors";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
 import { useOnClickOutside } from "@/hooks";
-import type { FormSubmitEvent, PickerColor } from "@/types";
+import type { FormSubmitEvent, IconKey, PickerColor } from "@/types";
 import { getFormData } from "@/helpers/getFormData";
 import { ColorPicker } from "./ColorPicker";
 import { useDexieCtx } from "@/context";
+import { ICON_KEYS } from "@/constants/icons";
 
 export interface AddListFormProps
   extends Omit<
@@ -28,7 +29,7 @@ export function AddListForm(props: AddListFormProps) {
     "onOutsideFormClick",
     "onFormSubmitSuccess",
   ]);
-  const [iconKey, setIconKey] = createSignal<IconKey>(IconKey.BOX);
+  const [iconKey, setIconKey] = createSignal<IconKey>("BOX");
   const [iconColor, setIconColor] = createSignal<PickerColor>("BLUE");
 
   let formRef: HTMLFormElement | undefined;
@@ -44,8 +45,8 @@ export function AddListForm(props: AddListFormProps) {
       .refine((val) => !lists().find((list) => list.name === val), {
         error: "list name is taken",
       }),
-    icon: z.enum(IconKey),
-    color: z.string(),
+    icon: z.enum(ICON_KEYS),
+    color: z.enum(COLOR_PICKER_KEYS),
   });
 
   function handleListFormSubmit(event: FormSubmitEvent) {
@@ -83,7 +84,7 @@ export function AddListForm(props: AddListFormProps) {
         onClick={local.onCloseForm}
       >
         <Icon
-          icon={AppIconKey.PLUS_CIRCLE}
+          icon="PLUS_CIRCLE"
           class="rotate-45 rounded-full w-full h-full stroke-[1.5] stroke-slate-400"
         />
       </button>

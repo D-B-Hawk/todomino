@@ -1,8 +1,8 @@
 import Dexie, { type EntityTable } from "dexie";
-import { type List, type ListName, type Todo } from "@/types";
-import { INIT_LIST_NAMES, READONLY_LIST_NAMES } from "@/constants";
+import type { List, ListName, Todo } from "@/types";
 import { createList } from "@/helpers";
 import { typedTable } from "./helpers";
+import { INITIAL_LIST_NAMES, LIST_INFO_MAP } from "@/constants/lists";
 
 export type ChosenList = {
   name: ListName;
@@ -39,9 +39,10 @@ db.version(1).stores(dbSchema);
 db.on("populate", function (transaction) {
   typedTable("lists", transaction)
     .bulkAdd(
-      [...INIT_LIST_NAMES, ...READONLY_LIST_NAMES].map((list) =>
-        createList({ name: list }),
-      ),
+      INITIAL_LIST_NAMES.map((list) => {
+        const { color, icon } = LIST_INFO_MAP[list];
+        return createList({ name: list, color, icon });
+      }),
     )
     // eslint-disable-next-line no-console -- i want to know when this happens
     .then(() => console.log("initialized table with known lists"))
