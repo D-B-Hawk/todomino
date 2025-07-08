@@ -1,15 +1,13 @@
 import type { DOMElement } from "solid-js/jsx-runtime";
-import {
-  IconKey,
-  INIT_LIST_NAMES,
-  PICKER_COLORS,
-  READONLY_LIST_NAMES,
-} from "./constants";
-
-export type RestrictedListName = (typeof READONLY_LIST_NAMES)[number];
-export type InitalListName = (typeof INIT_LIST_NAMES)[number];
-
-export type ListName = InitalListName | RestrictedListName | (string & {});
+import type { IconKey } from "@/constants/icons";
+import type {
+  ListName,
+  ReadOnlyListName,
+  MainListName,
+} from "@/constants/lists";
+import type { PickerColor } from "@types";
+export type { PickerColor } from "./constants/colors";
+export type { IconKey, ListName, ReadOnlyListName, MainListName };
 
 export type FormSubmitEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
@@ -18,7 +16,7 @@ export type FormSubmitEvent = SubmitEvent & {
 
 export type List = {
   name: ListName;
-  color: string;
+  color: PickerColor;
   icon: IconKey;
   createdAt: number;
   updatedAt: number;
@@ -45,5 +43,3 @@ export type ListCount = {
   list: List;
   todoCount: number;
 };
-
-export type PickerColor = keyof typeof PICKER_COLORS;
