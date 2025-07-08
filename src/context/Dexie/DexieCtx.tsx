@@ -13,11 +13,7 @@ import {
   listTodoCountObservable,
   type ListTodoCount,
 } from "./observables";
-import {
-  createList,
-  type CreateListArgs,
-  isRestrictedListName,
-} from "@/helpers";
+import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
 import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
 import { getDependents, getTodosByListName } from "./helpers";
@@ -62,7 +58,7 @@ export function DexieProvider(props: ParentProps) {
   }
 
   async function deleteList(listName: ListName) {
-    if (isRestrictedListName(listName)) {
+    if (isConstantListName(listName)) {
       throw new Error("unable to delete restricted list name");
     }
 

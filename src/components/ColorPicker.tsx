@@ -1,6 +1,6 @@
 import { For, Show, splitProps, type JSX } from "solid-js";
 import type { PickerColor } from "@/types";
-import { COLOR_PICKER_KEYS, PICKER_COLORS } from "@/constants";
+import { COLOR_PICKER_KEYS, PICKER_COLORS } from "@/constants/colors";
 
 interface ColorPickerProps extends JSX.HTMLAttributes<HTMLDivElement> {
   selectedColor: PickerColor;
