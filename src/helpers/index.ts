@@ -4,6 +4,7 @@ export { createTodo } from "./createTodo";
 export { getError } from "./getError";
 export { getFormData } from "./getFormData";
 export { isError } from "./isError";
-export { isRestrictedListName } from "./isRestrictedListName";
+export { isReadOnlyListName } from "./isReadOnlyListName";
+export { isConstantListName } from "./isConstantListName";
 export { noop } from "./noop";
 export { truncateText } from "./truncateText";
