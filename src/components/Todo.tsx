@@ -2,6 +2,7 @@ import { Show, type Component, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { type Todo } from "@/types";
 import { truncateText } from "@/helpers";
+import { Checkbox } from "./Checkbox";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -22,10 +23,9 @@ export const TodoComp: Component<TodoProps> = (props) => {
         <span class="text-gray-300">ID:{shortenedUUID}</span>
         <span>{props.todo.list}</span>
       </div>
-      <div class="flex items-center p-2 border border-red-300">
-        <input
-          type="checkbox"
-          on:change={(e) => props.onCheck(e.target.checked)}
+      <div class="flex items-center p-2 gap-1 border border-red-300">
+        <Checkbox
+          onCheck={(e) => props.onCheck(e.target.checked)}
           checked={!!props.todo.completedAt}
         />
         <div class="flex flex-1 items-center border border-purple-300">
