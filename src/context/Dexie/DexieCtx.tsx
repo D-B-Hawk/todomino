@@ -6,7 +6,7 @@ import {
 } from "solid-js";
 import { useObservable } from "@/hooks";
 import {
-  chosenListNameObservable,
+  chosenListObservable,
   chosenListTodosObservable,
   INIT_LIST_TODO_COUNT,
   listsObservable,
@@ -23,13 +23,13 @@ type DexieState = [
     lists: Accessor<List[]>;
     listsTodoCount: Accessor<ListTodoCount>;
     chosenListTodos: Accessor<Todo[]>;
-    chosenListName: Accessor<ListName | undefined>;
+    chosenList: Accessor<List | undefined>;
   },
   {
     addTodo: (todo: Todo) => Promise<void>;
     handleTodoCheck: (checked: boolean, todo: Todo) => Promise<void>;
     addList: (args: CreateListArgs) => Promise<void>;
-    chooseList: (listName: ListName) => void;
+    chooseList: (newList: List) => void;
     deleteList: (listName: ListName) => Promise<void[]>;
   },
 ];
@@ -39,13 +39,13 @@ export const DexieCtx = createContext<DexieState>();
 export function DexieProvider(props: ParentProps) {
   const lists = useObservable(listsObservable, []);
   const chosenListTodos = useObservable(chosenListTodosObservable, []);
-  const chosenListName = useObservable(chosenListNameObservable, "reminders");
+  const chosenList = useObservable(chosenListObservable, createList()); // this will default to reminders
   const listsTodoCount = useObservable(listTodoCountObservable, {
     ...INIT_LIST_TODO_COUNT,
   });
 
   async function addList(args: CreateListArgs) {
-    const currentList = chosenListName();
+    const currentList = chosenList();
     if (!currentList) {
       throw new Error("no current list");
     }
@@ -53,7 +53,7 @@ export function DexieProvider(props: ParentProps) {
     const newList = createList(args);
     return db.transaction("rw", db.lists, db.chosenList, async () => {
       await db.lists.add(newList);
-      await db.chosenList.update(currentList, { name: newList.name });
+      await db.chosenList.update(currentList, newList);
     });
   }
 
@@ -96,14 +96,14 @@ export function DexieProvider(props: ParentProps) {
     });
   }
 
-  function chooseList(listName: ListName) {
-    const currentList = chosenListName();
+  function chooseList(newList: List) {
+    const currentList = chosenList();
     if (currentList) {
-      db.chosenList.update(currentList, { name: listName });
+      db.chosenList.update(currentList, newList);
       return;
     }
     // if somehow the initial population did not take effect. add it here
-    db.chosenList.add({ name: listName });
+    db.chosenList.add(newList);
   }
 
   async function addTodo(todo: Todo) {
@@ -157,7 +157,7 @@ export function DexieProvider(props: ParentProps) {
     lists,
     listsTodoCount,
     chosenListTodos,
-    chosenListName,
+    chosenList,
   };
 
   const dexieMethods = {

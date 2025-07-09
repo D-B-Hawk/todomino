@@ -1,7 +1,8 @@
 import { liveQuery } from "dexie";
-import { db, sortTodosByKey, type ChosenList } from "@/db";
+import { db, sortTodosByKey } from "@/db";
 import { getTodosByListName } from "./helpers";
-import { type ListName } from "@/types";
+import type { ListName } from "@/types";
+import { createList } from "@/helpers";
 
 export type ListTodoCount = Record<ListName, number>;
 
@@ -19,9 +20,8 @@ export const listsObservable = liveQuery(() =>
 export const chosenListTodosObservable = liveQuery(() =>
   db.transaction("r", db.chosenList, db.todos, async () => {
     // defaulting the chosen list to reminders
-    const { name: chosenListName }: ChosenList = (await db.chosenList
-      .toCollection()
-      .first()) || { name: "reminders" };
+    const { name: chosenListName } =
+      (await db.chosenList.toCollection().first()) || createList(); // this will default to reminders
 
     const todosCollection = getTodosByListName(chosenListName);
 
@@ -43,7 +43,6 @@ export const listTodoCountObservable = liveQuery(() =>
   }),
 );
 
-export const chosenListNameObservable = liveQuery(async () => {
-  const chosenList = await db.chosenList.toCollection().first();
-  return chosenList?.name;
+export const chosenListObservable = liveQuery(async () => {
+  return db.chosenList.toCollection().first();
 });
