@@ -8,3 +8,4 @@ export { SelectInput, type SelectOption } from "./SelectInput";
 export { TextField } from "./TextField";
 export { TodoComp } from "./Todo";
 export { TodoForm } from "./TodoForm";
+export { ScrollableContainer } from "./ScrollableContainer";

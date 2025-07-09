@@ -10,7 +10,7 @@ import type { FormSubmitEvent, IconKey, PickerColor } from "@/types";
 import { getFormData } from "@/helpers/getFormData";
 import { ColorPicker } from "./ColorPicker";
 import { useDexieCtx } from "@/context";
-import { ICON_KEYS } from "@/constants/icons";
+import { APP_ICON_KEYS } from "@/constants/icons";
 
 export interface AddListFormProps
   extends Omit<
@@ -45,7 +45,7 @@ export function AddListForm(props: AddListFormProps) {
       .refine((val) => !lists().find((list) => list.name === val), {
         error: "list name is taken",
       }),
-    icon: z.enum(ICON_KEYS),
+    icon: z.enum(APP_ICON_KEYS),
     color: z.enum(COLOR_PICKER_KEYS),
   });
 
@@ -107,7 +107,7 @@ export function AddListForm(props: AddListFormProps) {
       <div class="flex flex-col items-center gap-4">
         <h3 class="self-center font-semibold">Icon</h3>
         <div class="flex flex-wrap items-center justify-center gap-2 max-w-64">
-          <For each={ICON_KEYS}>
+          <For each={APP_ICON_KEYS}>
             {(key) => (
               <IconButton
                 onClick={() => setIconKey(key)}

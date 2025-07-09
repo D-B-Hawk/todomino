@@ -20,8 +20,7 @@ type TodoFormProps = JSX.HTMLAttributes<HTMLFormElement>;
 export function TodoForm(props: TodoFormProps) {
   const [local, formProps] = splitProps(props, ["class"]);
 
-  const [{ lists, chosenListTodos, chosenListName }, { addTodo }] =
-    useDexieCtx();
+  const [{ lists, chosenListTodos, chosenList }, { addTodo }] = useDexieCtx();
 
   // returns  an array of select options for lists
   // that are not readonly
@@ -35,7 +34,7 @@ export function TodoForm(props: TodoFormProps) {
 
         // make the selected list the first option when
         // creating the todo
-        if (name === chosenListName()) {
+        if (name === chosenList()?.name) {
           prev.unshift(option);
         } else {
           prev.push(option);

@@ -1,4 +1,4 @@
-export { db, type ChosenList } from "./db";
+export { db } from "./db";
 export {
   getTodosWhereKey,
   sortTodosByKey,
