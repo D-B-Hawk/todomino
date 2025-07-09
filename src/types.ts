@@ -5,9 +5,8 @@ import type {
   ReadOnlyListName,
   MainListName,
 } from "@/constants/lists";
-import type { PickerColor } from "@types";
-export type { PickerColor } from "./constants/colors";
-export type { IconKey, ListName, ReadOnlyListName, MainListName };
+import type { PickerColor } from "@/constants/colors";
+export type { IconKey, ListName, ReadOnlyListName, MainListName, PickerColor };
 
 export type FormSubmitEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
