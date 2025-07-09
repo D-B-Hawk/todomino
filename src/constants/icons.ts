@@ -17,7 +17,11 @@ import YouTubeIcon from "@/assets/youtube.svg";
 import ZapIcon from "@/assets/zap.svg";
 import PlusCircleIcon from "@/assets/plus-circle.svg";
 
-export const ICON_MAP = {
+export const RESTRICTED_ICON_MAP = {
+  PLUS_CIRCLE: PlusCircleIcon,
+} as const;
+
+export const APP_ICON_MAP = {
   BOX: BoxIcon,
   CHECK: CheckCircleIcon,
   CLOCK: ClockIcon,
@@ -35,9 +39,15 @@ export const ICON_MAP = {
   TV: TvIcon,
   YOUTUBE: YouTubeIcon,
   ZAP: ZapIcon,
-  PLUS_CIRCLE: PlusCircleIcon,
 } as const;
 
-export type IconKey = keyof typeof ICON_MAP;
+export const ICON_MAP = {
+  ...RESTRICTED_ICON_MAP,
+  ...APP_ICON_MAP,
+} as const;
 
-export const ICON_KEYS = Object.keys(ICON_MAP) as IconKey[];
+export type RestrictedIconKey = keyof typeof RESTRICTED_ICON_MAP;
+export type AppIconKey = keyof typeof APP_ICON_MAP;
+export type IconKey = RestrictedIconKey | AppIconKey;
+
+export const APP_ICON_KEYS = Object.keys(APP_ICON_MAP) as AppIconKey[];
