@@ -10,19 +10,19 @@ import {
   chosenListTodosObservable,
   INIT_LIST_TODO_COUNT,
   listsObservable,
-  listTodoCountObservable,
   type ListTodoCount,
+  listTodoCountObservable,
 } from "./observables";
 import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
 import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
-import { getDependents, getTodosByListName } from "./helpers";
+import { getDependents, getTodosCollectionByListName } from "./helpers";
 
-type DexieState = [
+type DexCtx = [
   {
     lists: Accessor<List[]>;
     listsTodoCount: Accessor<ListTodoCount>;
-    chosenListTodos: Accessor<Todo[]>;
+    chosenListTodos: Accessor<{ complete: Todo[]; incomplete: Todo[] }>;
     chosenList: Accessor<List | undefined>;
   },
   {
@@ -34,11 +34,14 @@ type DexieState = [
   },
 ];
 
-export const DexieCtx = createContext<DexieState>();
+export const DexieCtx = createContext<DexCtx>();
 
 export function DexieProvider(props: ParentProps) {
   const lists = useObservable(listsObservable, []);
-  const chosenListTodos = useObservable(chosenListTodosObservable, []);
+  const chosenListTodos = useObservable(chosenListTodosObservable, {
+    complete: [],
+    incomplete: [],
+  });
   const chosenList = useObservable(chosenListObservable, createList()); // this will default to reminders
   const listsTodoCount = useObservable(listTodoCountObservable, {
     ...INIT_LIST_TODO_COUNT,
@@ -62,10 +65,7 @@ export function DexieProvider(props: ParentProps) {
       throw new Error("unable to delete restricted list name");
     }
 
-    const listTodos = await getTodosByListName(
-      listName,
-      "keepCompleted",
-    ).toArray();
+    const todos = await getTodosCollectionByListName(listName).toArray();
 
     return db.transaction("rw", db.lists, db.todos, () => {
       // delete the list
@@ -73,7 +73,7 @@ export function DexieProvider(props: ParentProps) {
 
       // delete all the todos within that list, update todos that are either dependent
       // or depended on if they are not within that list
-      const updatedTodosTransactions = listTodos.map(async (todo) => {
+      const updatedTodosTransactions = todos.map(async (todo) => {
         const { dependentTodo, dependsOnTodo } = await getDependents(todo);
         const now = Date.now();
 

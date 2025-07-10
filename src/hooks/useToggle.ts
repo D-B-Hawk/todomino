@@ -7,5 +7,5 @@ export function useToggle(on: boolean = false) {
     setIsOn((cur) => !cur);
   }
 
-  return [isOn, { toggle }] as const;
+  return [isOn, { toggle }, setIsOn] as const;
 }

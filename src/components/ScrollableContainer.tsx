@@ -8,7 +8,7 @@ export function ScrollableContainer(props: ScrollableContainerProps) {
   return (
     <div
       class={twMerge(
-        "flex flex-col flex-1 w-full overflow-y-auto border border-red-500",
+        "flex flex-col flex-1 w-full overflow-y-auto",
         local.class,
       )}
       {...rest}

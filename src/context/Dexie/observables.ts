@@ -1,6 +1,9 @@
 import { liveQuery } from "dexie";
-import { db, sortTodosByKey } from "@/db";
-import { getTodosByListName } from "./helpers";
+import { db } from "@/db";
+import {
+  getCompleteIncompleteTodos,
+  getTodosCollectionByListName,
+} from "./helpers";
 import type { ListName } from "@/types";
 import { createList } from "@/helpers";
 
@@ -23,12 +26,8 @@ export const chosenListTodosObservable = liveQuery(() =>
     const { name: chosenListName } =
       (await db.chosenList.toCollection().first()) || createList(); // this will default to reminders
 
-    const todosCollection = getTodosByListName(chosenListName);
-
-    if (chosenListName === "completed") {
-      return sortTodosByKey("completedAt", todosCollection);
-    }
-    return sortTodosByKey("createdAt", todosCollection);
+    const todosCollection = getTodosCollectionByListName(chosenListName);
+    return getCompleteIncompleteTodos(todosCollection);
   }),
 );
 
@@ -37,7 +36,11 @@ export const listTodoCountObservable = liveQuery(() =>
     const listsTodoCount = { ...INIT_LIST_TODO_COUNT };
     const lists = await db.lists.toArray();
     lists.forEach(async (list) => {
-      listsTodoCount[list.name] = await getTodosByListName(list.name).count();
+      let todosCollection = getTodosCollectionByListName(list.name);
+      if (list.name !== "completed") {
+        todosCollection = todosCollection.and((todo) => !todo.completedAt);
+      }
+      listsTodoCount[list.name] = await todosCollection.count();
     });
     return listsTodoCount;
   }),
