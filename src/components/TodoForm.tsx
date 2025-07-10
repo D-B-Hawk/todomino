@@ -46,7 +46,7 @@ export function TodoForm(props: TodoFormProps) {
   // return an array of select options for todos that
   // currently have no todo that is dependent on it
   const availableDependentOptions = () =>
-    chosenListTodos().reduce<SelectOption[]>((prev, cur) => {
+    chosenListTodos().incomplete.reduce<SelectOption[]>((prev, cur) => {
       if (!cur.dependent) {
         prev.push({
           id: cur.id,
