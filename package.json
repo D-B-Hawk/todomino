@@ -16,6 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.2",
     "dexie": "^4.0.11",
     "solid-js": "^1.9.5",
     "tailwind-merge": "^3.3.0",

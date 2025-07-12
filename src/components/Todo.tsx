@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { type Todo } from "@/types";
 import { truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
+import { PopUpMenu } from "./PopUpMenu";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -23,7 +24,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
         <span class="text-gray-300">ID:{shortenedUUID}</span>
         <span>{props.todo.list}</span>
       </div>
-      <div class="flex items-center p-2 gap-1 border border-red-300">
+      <div class="relative flex items-center p-2 gap-1 border border-red-300">
         <Checkbox
           onCheck={(e) => props.onCheck(e.target.checked)}
           checked={!!props.todo.completedAt}
@@ -31,6 +32,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
         <div class="flex flex-1 items-center border border-purple-300">
           {props.todo.description}
         </div>
+        <PopUpMenu />
       </div>
       <Show when={!!props.todo.dependent || !!props.todo.dependsOn}>
         <div class="flex w-full flex-col bottom-1 left-1 text-gray-300">
