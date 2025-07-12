@@ -1,14 +1,20 @@
 import { onCleanup, onMount, type Accessor } from "solid-js";
 
-type MaybeElement = HTMLElement | undefined | null;
+type MaybeElement<T extends HTMLElement = HTMLElement> =
+  | T
+  | null
+  | undefined
+  | ((el: T) => void);
+
 type PossibleEvent = MouseEvent | TouchEvent;
 
-export function useOnClickOutside<T extends MaybeElement>(
-  ref: Accessor<T>,
+export function useOnClickOutside<T extends HTMLElement>(
+  ref: Accessor<MaybeElement<T>>,
   handler: (event: PossibleEvent) => void,
 ) {
   const listener = (event: PossibleEvent) => {
-    if (!ref() || withinBounds(ref(), event)) {
+    const element = getElement(ref());
+    if (!element || withinBounds(element, event)) {
       return;
     }
     handler(event);
@@ -25,8 +31,12 @@ export function useOnClickOutside<T extends MaybeElement>(
   });
 }
 
-function withinBounds(element: MaybeElement, event: PossibleEvent) {
+function withinBounds(element: HTMLElement, event: PossibleEvent) {
   return (
     element && event.target instanceof Node && element.contains(event.target)
   );
+}
+
+function getElement<T extends HTMLElement>(maybe: MaybeElement<T>): T | null {
+  return typeof maybe === "function" ? null : (maybe ?? null);
 }
