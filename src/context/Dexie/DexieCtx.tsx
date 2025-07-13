@@ -17,6 +17,7 @@ import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
 import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
 import { getDependents, getTodosCollectionByListName } from "./helpers";
+import { updateTodoDependents } from "./transactions";
 
 type DexCtx = [
   {
@@ -27,6 +28,7 @@ type DexCtx = [
   },
   {
     addTodo: (todo: Todo) => Promise<void>;
+    deleteTodo: (todo: Todo) => Promise<void>;
     handleTodoCheck: (checked: boolean, todo: Todo) => Promise<void>;
     addList: (args: CreateListArgs) => Promise<void>;
     chooseList: (newList: List) => void;
@@ -67,29 +69,15 @@ export function DexieProvider(props: ParentProps) {
 
     const todos = await getTodosCollectionByListName(listName).toArray();
 
-    return db.transaction("rw", db.lists, db.todos, () => {
+    return db.transaction("rw", db.lists, db.todos, (tx) => {
       // delete the list
-      db.lists.delete(listName);
+      tx.lists.delete(listName);
 
       // delete all the todos within that list, update todos that are either dependent
       // or depended on if they are not within that list
       const updatedTodosTransactions = todos.map(async (todo) => {
-        const { dependentTodo, dependsOnTodo } = await getDependents(todo);
-        const now = Date.now();
-
         db.todos.delete(todo.id);
-        if (dependsOnTodo && dependsOnTodo.list !== todo.list) {
-          await db.todos.update(dependsOnTodo, {
-            updatedAt: now,
-            dependent: undefined,
-          });
-        }
-        if (dependentTodo && dependentTodo.list !== todo.list) {
-          await db.todos.update(dependentTodo, {
-            updatedAt: now,
-            dependsOn: undefined,
-          });
-        }
+        updateTodoDependents(tx, todo, "ignoreWithinList");
       });
 
       return Promise.all(updatedTodosTransactions);
@@ -121,35 +109,30 @@ export function DexieProvider(props: ParentProps) {
     });
   }
 
+  function deleteTodo(todo: Todo) {
+    return db.transaction("rw", db.todos, (tx) => {
+      tx.todos.delete(todo.id);
+      updateTodoDependents(tx, todo);
+    });
+  }
+
   async function handleTodoCheck(checked: boolean, todo: Todo) {
     // in the case of debouncing it is possible for nothing to change
     // for that situation return
     if (checked === !!todo.completedAt) {
       return;
     }
-    const { dependentTodo, dependsOnTodo } = await getDependents(todo);
     const now = Date.now();
     const completedAt = checked ? now : undefined;
 
-    return db.transaction("rw", db.todos, async () => {
-      db.todos.update(todo, {
+    return db.transaction("rw", db.todos, async (tx) => {
+      tx.todos.update(todo, {
         updatedAt: now,
         dependent: undefined,
         dependsOn: undefined,
         completedAt,
       });
-      if (dependsOnTodo && dependentTodo?.id) {
-        await db.todos.update(dependsOnTodo, {
-          updatedAt: now,
-          dependent: dependentTodo.id, // if the todo also had a dependent. transfer that dependent to its dependsOn
-        });
-      }
-      if (dependentTodo && dependsOnTodo) {
-        await db.todos.update(dependentTodo, {
-          updatedAt: now,
-          dependsOn: dependsOnTodo.id, // transfer the dependsOn todo to the child if present
-        });
-      }
+      updateTodoDependents(tx, todo);
     });
   }
 
@@ -162,6 +145,7 @@ export function DexieProvider(props: ParentProps) {
 
   const dexieMethods = {
     addTodo,
+    deleteTodo,
     handleTodoCheck,
     addList,
     chooseList,
