@@ -1,4 +1,4 @@
-import { splitProps, type JSX } from "solid-js";
+import { Show, splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod/v4";
 
@@ -12,6 +12,13 @@ import { useDexieCtx } from "@/context";
 export const TODO_FORM_SCHEMA = z.object({
   description: z.string().min(1),
   dependsOn: z.string().optional(),
+  dueDate: z
+    .string()
+    .optional()
+    .refine((date) => !date || z.iso.date().safeParse(date).success, {
+      error: "Invalid ISO date format",
+    })
+    .transform((date) => (date ? Date.parse(date) : undefined)),
   list: LIST_UNION,
 });
 
@@ -42,7 +49,6 @@ export function TodoForm(props: TodoFormProps) {
       }
       return prev;
     }, []);
-
   // return an array of select options for todos that
   // currently have no todo that is dependent on it
   const availableDependentOptions = () =>
@@ -92,11 +98,14 @@ export function TodoForm(props: TodoFormProps) {
         labelProps={{ label: "List:" }}
         options={listSelectOptions()}
       />
-      <SelectInput
-        name="dependsOn"
-        labelProps={{ label: "Dependent:" }}
-        options={availableDependentOptions()}
-      />
+      <Show when={chosenListTodos().incomplete.length}>
+        <SelectInput
+          name="dependsOn"
+          labelProps={{ label: "Dependent:" }}
+          options={availableDependentOptions()}
+        />
+      </Show>
+      <input type="date" name="dueDate" />
       <button class="bg-blue-400 rounded-md text-white p-2 px-4 w-fit self-center cursor-pointer">
         submit
       </button>

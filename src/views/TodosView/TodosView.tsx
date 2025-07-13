@@ -7,10 +7,8 @@ import { TodoComp, TodoForm, ScrollableContainer } from "@/components";
 import { TodosViewHeader } from "./TodosViewHeader";
 
 export function TodosView() {
-  const [
-    { chosenListTodos, chosenList, listsTodoCount },
-    { handleTodoCheck, deleteTodo },
-  ] = useDexieCtx();
+  const [{ chosenListTodos, chosenList }, { handleTodoCheck, deleteTodo }] =
+    useDexieCtx();
   const [showComplete, { toggle }, setShowComplete] = useToggle();
 
   async function handleCheck(checked: boolean, todo: Todo) {
@@ -46,7 +44,7 @@ export function TodosView() {
         {(list) => (
           <TodosViewHeader
             list={list()}
-            completedTodos={listsTodoCount()[list().name]}
+            completedTodos={chosenListTodos().complete.length}
             onHideShowClick={toggle}
             showComplete={showComplete()}
           />

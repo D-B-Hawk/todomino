@@ -40,7 +40,9 @@ export function TodosViewHeader(props: TodosViewHeaderProps) {
       >
         <div class="flex justify-between">
           <span>{local.completedTodos} Completed</span>
-          <Show when={!isReadOnlyListName(local.list.name)}>
+          <Show
+            when={!isReadOnlyListName(local.list.name) && local.completedTodos}
+          >
             <button
               class="cursor-pointer"
               onClick={local.onHideShowClick}

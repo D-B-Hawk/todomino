@@ -15,6 +15,9 @@ export function getTodosCollectionByListName(listName: ListName) {
     const todos = getTodosWhereKey("dependent").notEqual("");
     return orWhereIndexOrPrimary("dependsOn", todos).notEqual("");
   }
+  if (listName === "today") {
+    return getTodosWhereKey("dueDate").belowOrEqual(Date.now());
+  }
 
   return getTodosWhereKey("list").equals(listName);
 }
