@@ -26,6 +26,7 @@ export type Todo = {
   description: string;
   createdAt: number;
   updatedAt: number;
+  dueDate?: number;
   completedAt?: number;
   dependsOn?: Todo["id"];
   dependent?: Todo["id"];

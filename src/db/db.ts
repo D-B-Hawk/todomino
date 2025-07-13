@@ -12,19 +12,22 @@ export type TodosDBTable = {
 
 export const db = new Dexie("TodosDB") as Dexie & TodosDBTable;
 
-const TODO_KEYS = new Set<Readonly<keyof Todo>>([
-  "id",
-  "list",
-  "description",
-  "createdAt",
-  "updatedAt",
-  "completedAt",
-  "dependent",
-  "dependsOn",
-]);
+const TODO_KEY_MAP: Record<keyof Todo, keyof Todo> = {
+  id: "id",
+  list: "list",
+  description: "description",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+  dueDate: "dueDate",
+  completedAt: "completedAt",
+  dependent: "dependent",
+  dependsOn: "dependsOn",
+};
+
+const TODO_KEYS = Object.values(TODO_KEY_MAP);
 
 const dbSchema: Record<keyof TodosDBTable, string> = {
-  todos: `${Array.from(TODO_KEYS).join(", ")}`,
+  todos: `${TODO_KEYS.join(", ")}`,
   lists: "name",
   chosenList: "name",
 };
