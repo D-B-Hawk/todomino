@@ -1,10 +1,10 @@
-import { Show, createEffect, createSignal } from "solid-js";
+import { Show, createEffect, createSignal, type ParentProps } from "solid-js";
 import { computePosition, offset } from "@floating-ui/dom";
 import { IconButton } from "./IconButton";
 import { useToggle } from "@/hooks";
 import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
 
-export function PopUpMenu() {
+export function PopUpMenu(props: ParentProps) {
   const [menuOpen, { toggle }, showMenu] = useToggle();
 
   const [menuEl, setMenuEl] = createSignal<HTMLDivElement>();
@@ -16,7 +16,7 @@ export function PopUpMenu() {
     if (menu && button) {
       computePosition(button, menu, {
         placement: "left",
-        middleware: [offset(6)],
+        middleware: [offset(40)],
       }).then(({ x, y }) => {
         Object.assign(menu.style, {
           left: `${x}px`,
@@ -50,10 +50,9 @@ export function PopUpMenu() {
         <OnClickOutsideContainer
           onDivMount={setMenuEl}
           onClickOutside={handleClickOutside}
-          role="menu"
           class="absolute max-w-fit top-0 left-0 p-2 border bg-white"
         >
-          Menu
+          {props.children}
         </OnClickOutsideContainer>
       </Show>
     </div>
