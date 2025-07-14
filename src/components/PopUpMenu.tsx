@@ -1,10 +1,17 @@
-import { Show, createEffect, createSignal, type ParentProps } from "solid-js";
+import {
+  Show,
+  createEffect,
+  createSignal,
+  splitProps,
+  type JSX,
+} from "solid-js";
 import { computePosition, offset } from "@floating-ui/dom";
 import { IconButton } from "./IconButton";
 import { useToggle } from "@/hooks";
 import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
+import { twMerge } from "tailwind-merge";
 
-export function PopUpMenu(props: ParentProps) {
+export function PopUpMenu(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [menuOpen, { toggle }, showMenu] = useToggle();
 
   const [menuEl, setMenuEl] = createSignal<HTMLDivElement>();
@@ -39,8 +46,10 @@ export function PopUpMenu(props: ParentProps) {
     toggle();
   }
 
+  const [local, rest] = splitProps(props, ["class"]);
+
   return (
-    <div class="relative">
+    <div class={twMerge("relative", local.class)} {...rest}>
       <IconButton
         onMouseDown={handleMouseDown}
         ref={setButtonEl}

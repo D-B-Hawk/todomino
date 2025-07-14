@@ -29,6 +29,7 @@ type DexCtx = [
   {
     addTodo: (todo: Todo) => Promise<void>;
     deleteTodo: (todo: Todo) => Promise<void>;
+    updateTodo: (todo: Todo) => Promise<number>;
     handleTodoCheck: (checked: boolean, todo: Todo) => Promise<void>;
     addList: (args: CreateListArgs) => Promise<void>;
     chooseList: (newList: List) => void;
@@ -116,6 +117,10 @@ export function DexieProvider(props: ParentProps) {
     });
   }
 
+  function updateTodo(todo: Todo) {
+    return db.todos.update(todo.id, todo);
+  }
+
   async function handleTodoCheck(checked: boolean, todo: Todo) {
     // in the case of debouncing it is possible for nothing to change
     // for that situation return
@@ -146,6 +151,7 @@ export function DexieProvider(props: ParentProps) {
   const dexieMethods = {
     addTodo,
     deleteTodo,
+    updateTodo,
     handleTodoCheck,
     addList,
     chooseList,
