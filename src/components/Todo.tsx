@@ -1,9 +1,18 @@
-import { Show, splitProps, type Component, type JSX } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  Show,
+  splitProps,
+  type Component,
+  type JSX,
+} from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { type Todo } from "@/types";
 import { truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
+import { useToggle } from "@/hooks";
+import { useDexieCtx } from "@/context";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -19,7 +28,55 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "onDelete",
   ]);
 
-  const shortenedUUID = truncateText(props.todo.id, 8);
+  const [, { updateTodo }] = useDexieCtx();
+
+  const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
+  const [updatedDescription, setUpdatedDescription] = createSignal(
+    local.todo.description,
+  );
+
+  const [showInput, { toggle }, setShowInput] = useToggle();
+
+  function handleClickOutside() {
+    if (updatedDescription() !== local.todo.description) {
+      const updatedTodo: Todo = {
+        ...local.todo,
+        updatedAt: Date.now(),
+        description: updatedDescription() || "New reminder", // give default
+      };
+
+      updateTodo(updatedTodo)
+        .then(toggle)
+        .catch((error) => {
+          console.error(error);
+          toggle();
+        });
+    } else {
+      toggle();
+    }
+  }
+
+  function handleOutside(event: MouseEvent) {
+    if (
+      event.target instanceof Node &&
+      containerRef()?.contains(event.target)
+    ) {
+      return;
+    }
+    setShowInput(false);
+  }
+
+  createEffect(() => {
+    if (showInput()) {
+      document.addEventListener("mousedown", handleOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleOutside);
+      };
+    }
+    document.removeEventListener("mousedown", handleOutside);
+  });
+
+  const shortenedUUID = truncateText(local.todo.id, 8);
 
   return (
     <div
@@ -27,21 +84,34 @@ export const TodoComp: Component<TodoProps> = (props) => {
         "flex flex-col w-80 py-2 rounded-lg border border-blue-400",
         local.class,
       )}
+      ref={setContainerRef}
       {...rest}
     >
       <div class="flex justify-between px-2">
         <span class="text-gray-300">ID:{shortenedUUID}</span>
         <span>{local.todo.list}</span>
       </div>
-      <div class="relative flex items-center p-2 gap-1 border border-red-300">
+      <div class="relative flex p-2 gap-1 border border-red-300">
         <Checkbox
+          class="mt-1"
           onCheck={(e) => local.onCheck(e.target.checked)}
           checked={!!local.todo.completedAt}
         />
-        <div class="flex flex-1 items-center border border-purple-300">
-          {local.todo.description}
+        <div class="flex flex-col flex-1 border border-red-300 justify-between">
+          <input
+            type="text"
+            value={updatedDescription()}
+            onFocus={toggle}
+            onInput={(e) => setUpdatedDescription(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleClickOutside();
+              }
+            }}
+          />
+          <Show when={showInput()}>Some other functionality</Show>
         </div>
-        <PopUpMenu>
+        <PopUpMenu class="mt-1">
           <menu>
             <li>
               <button
