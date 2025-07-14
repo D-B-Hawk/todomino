@@ -3,21 +3,22 @@ import { v4 as uuid } from "uuid";
 
 import { type Todo } from "../types";
 
-type TodoArgs = Partial<Pick<Todo, "description" | "dependsOn" | "list">>;
+export function createTodo(args: Partial<Todo> = {}): Todo {
+  const now = Date.now();
 
-export function createTodo(args: TodoArgs = {}): Todo {
   const {
+    id = uuid(),
+    createdAt = now,
+    updatedAt = now,
     description = faker.lorem.sentence(),
     list = "reminders",
     ...rest
   } = args;
 
-  const now = Date.now();
-
   return {
-    id: uuid(),
-    createdAt: now,
-    updatedAt: now,
+    id,
+    createdAt,
+    updatedAt,
     description,
     list,
     ...rest,
