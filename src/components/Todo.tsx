@@ -13,6 +13,7 @@ import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
 import { useDexieCtx } from "@/context";
+import { DatePickerButton } from "./DatePickerButton";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -34,26 +35,27 @@ export const TodoComp: Component<TodoProps> = (props) => {
   const [updatedDescription, setUpdatedDescription] = createSignal(
     local.todo.description,
   );
+  const [updatedDueDate, setUpdatedDueDate] = createSignal(local.todo.dueDate);
 
   const [showInput, { toggle }, setShowInput] = useToggle();
 
   function handleClickOutside() {
-    if (updatedDescription() !== local.todo.description) {
+    if (
+      updatedDescription() !== local.todo.description ||
+      updatedDueDate() !== local.todo.dueDate
+    ) {
       const updatedTodo: Todo = {
         ...local.todo,
         updatedAt: Date.now(),
-        description: updatedDescription() || "New reminder", // give default
+        description: updatedDescription() || "New reminder", // give default,
+        dueDate: updatedDueDate(),
       };
 
-      updateTodo(updatedTodo)
-        .then(toggle)
-        .catch((error) => {
-          console.error(error);
-          toggle();
-        });
-    } else {
-      toggle();
+      updateTodo(updatedTodo).catch((error) => {
+        console.error(error);
+      });
     }
+    toggle();
   }
 
   function handleOutside(event: MouseEvent) {
@@ -63,7 +65,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
     ) {
       return;
     }
-    setShowInput(false);
+    handleClickOutside();
   }
 
   createEffect(() => {
@@ -97,11 +99,11 @@ export const TodoComp: Component<TodoProps> = (props) => {
           onCheck={(e) => local.onCheck(e.target.checked)}
           checked={!!local.todo.completedAt}
         />
-        <div class="flex flex-col flex-1 border border-red-300 justify-between">
+        <div class="flex flex-col flex-1 gap-2 border border-red-300 justify-between">
           <input
             type="text"
             value={updatedDescription()}
-            onFocus={toggle}
+            onFocus={() => setShowInput(true)}
             onInput={(e) => setUpdatedDescription(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -109,7 +111,12 @@ export const TodoComp: Component<TodoProps> = (props) => {
               }
             }}
           />
-          <Show when={showInput()}>Some other functionality</Show>
+          <Show when={showInput()}>
+            <DatePickerButton
+              currentDate={updatedDueDate()}
+              onDateChange={setUpdatedDueDate}
+            />
+          </Show>
         </div>
         <PopUpMenu class="mt-1">
           <menu>
