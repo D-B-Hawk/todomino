@@ -17,6 +17,7 @@ import YouTubeIcon from "@/assets/youtube.svg";
 import ZapIcon from "@/assets/zap.svg";
 import PlusCircleIcon from "@/assets/plus-circle.svg";
 import EllipsisIcon from "@/assets/more-vertical.svg";
+import CalendarIcon from "@/assets/calendar.svg";
 
 export const RESTRICTED_ICON_MAP = {
   PLUS_CIRCLE: PlusCircleIcon,
@@ -25,6 +26,7 @@ export const RESTRICTED_ICON_MAP = {
 
 export const APP_ICON_MAP = {
   BOX: BoxIcon,
+  CALENDAR: CalendarIcon,
   CHECK: CheckCircleIcon,
   CLOCK: ClockIcon,
   COFFEE: CoffeeIcon,
