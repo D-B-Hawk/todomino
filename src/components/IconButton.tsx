@@ -15,6 +15,7 @@ export function IconButton(props: IconButtonProps) {
       {...buttonProps}
     >
       <Icon {...local.iconProps} />
+      {props.children}
     </button>
   );
 }

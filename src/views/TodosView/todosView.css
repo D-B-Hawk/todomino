@@ -1,0 +1,23 @@
+.slide-fade-enter,
+.slide-fade-exit-to {
+  transform: translateY(30px);
+  opacity: 0;
+}
+
+.slide-fade-exit-active,
+.slide-fade-enter-active {
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+
+.add-todo-exit-to {
+  transform: translateY(30px);
+  opacity: 0;
+}
+
+.add-todo-exit-active {
+  transition:
+    opacity 0.01s,
+    transform 0.01s;
+}

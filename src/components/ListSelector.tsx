@@ -1,12 +1,11 @@
 import { Show, splitProps, type JSX } from "solid-js";
-import { Dynamic } from "solid-js/web";
 import { twMerge } from "tailwind-merge";
 
 import { isConstantListName } from "@/helpers";
 import type { List, ListName } from "@/types";
 import { IconButton } from "./IconButton";
-import { ICON_MAP } from "@/constants/icons";
 import { PICKER_COLORS } from "@/constants/colors";
+import { Icon } from "./Icon";
 
 interface ListSelectorProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -59,8 +58,9 @@ export function ListSelector(props: ListSelectorProps) {
           }}
           class="p-1 rounded-full"
         >
-          <Dynamic
-            component={ICON_MAP[localProps.list.icon]}
+          <Icon
+            icon={localProps.list.icon}
+            class="w-6"
             style={{
               stroke: localProps.selected
                 ? PICKER_COLORS[localProps.list.color]

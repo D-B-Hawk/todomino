@@ -78,21 +78,20 @@ export function AddListForm(props: AddListFormProps) {
       onSubmit={handleListFormSubmit}
       {...formProps}
     >
-      <button
-        class="absolute w-10 h-10 top-2 right-2 rounded-full"
-        type="button"
+      <IconButton
         onClick={local.onCloseForm}
-      >
-        <Icon
-          icon="PLUS_CIRCLE"
-          class="rotate-45 rounded-full w-full h-full stroke-[1.5] stroke-slate-400"
-        />
-      </button>
+        class="absolute w-10 h-10 top-2 right-2 rounded-full"
+        iconProps={{
+          icon: "PLUS_CIRCLE",
+          class:
+            "rotate-45 rounded-full w-full h-full stroke-[1.5] stroke-slate-400",
+        }}
+      />
       <div
         class="border p-2 h-fit w-fit rounded-full self-center"
         style={{ "background-color": PICKER_COLORS[iconColor()] }}
       >
-        <Icon icon={iconKey()} class="stroke-white" />
+        <Icon icon={iconKey()} class="stroke-white w-6" />
       </div>
       <label class="flex gap-2 items-center">
         Name:
@@ -113,7 +112,7 @@ export function AddListForm(props: AddListFormProps) {
                 onClick={() => setIconKey(key)}
                 style={{ "background-color": PICKER_COLORS[iconColor()] }}
                 class="p-2"
-                iconProps={{ icon: key, stroke: "white" }}
+                iconProps={{ icon: key, stroke: "white", class: "w-6" }}
               />
             )}
           </For>

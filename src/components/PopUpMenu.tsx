@@ -2,14 +2,15 @@ import {
   Show,
   createEffect,
   createSignal,
+  on,
   splitProps,
   type JSX,
 } from "solid-js";
+import { twMerge } from "tailwind-merge";
 import { computePosition, offset } from "@floating-ui/dom";
 import { IconButton } from "./IconButton";
 import { useToggle } from "@/hooks";
 import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
-import { twMerge } from "tailwind-merge";
 
 export function PopUpMenu(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [menuOpen, { toggle }, showMenu] = useToggle();
@@ -17,29 +18,33 @@ export function PopUpMenu(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [menuEl, setMenuEl] = createSignal<HTMLDivElement>();
   const [buttonEl, setButtonEl] = createSignal<HTMLButtonElement>();
 
-  createEffect(() => {
-    const menu = menuEl();
-    const button = buttonEl();
-    if (menu && button) {
-      computePosition(button, menu, {
-        placement: "left",
-        middleware: [offset(40)],
-      }).then(({ x, y }) => {
-        Object.assign(menu.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      });
-    }
-  });
+  createEffect(
+    on(
+      menuEl,
+      (menu) => {
+        const button = buttonEl();
+        if (menu && button) {
+          computePosition(button, menu, {
+            placement: "left",
+            middleware: [offset(40)],
+          }).then(({ x, y }) => {
+            Object.assign(menu.style, {
+              left: `${x}px`,
+              top: `${y}px`,
+            });
+          });
+        }
+      },
+      { defer: true },
+    ),
+  );
 
   function handleClickOutside() {
+    setMenuEl(undefined);
     showMenu(false);
   }
 
-  function handleMouseDown() {
-    // this competes with the handleClickOutside
-    // allow that func to close the menu
+  function handleClick() {
     if (menuOpen()) {
       return;
     }
@@ -51,7 +56,7 @@ export function PopUpMenu(props: JSX.HTMLAttributes<HTMLDivElement>) {
   return (
     <div class={twMerge("relative", local.class)} {...rest}>
       <IconButton
-        onMouseDown={handleMouseDown}
+        onClick={handleClick}
         ref={setButtonEl}
         iconProps={{ icon: "ELLIPSIS", class: "h-4" }}
       />
