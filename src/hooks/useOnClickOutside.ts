@@ -21,13 +21,11 @@ export function useOnClickOutside<T extends HTMLElement>(
   };
 
   onMount(() => {
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
+    document.addEventListener("click", listener);
   });
 
   onCleanup(() => {
-    document.removeEventListener("mousedown", listener);
-    document.removeEventListener("touchstart", listener);
+    document.removeEventListener("click", listener);
   });
 }
 
