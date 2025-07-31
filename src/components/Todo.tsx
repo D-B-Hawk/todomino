@@ -1,6 +1,8 @@
 import {
   createEffect,
   createSignal,
+  on,
+  onCleanup,
   Show,
   splitProps,
   type Component,
@@ -12,13 +14,15 @@ import { truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
-import { useDexieCtx } from "@/context";
 import { DatePickerButton } from "./DatePickerButton";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
   onCheck: (checked: boolean) => void;
   onDelete: () => void;
+  onEnter: (event: KeyboardEvent) => void;
+  onUpdateDescription: (value: string) => void;
+  onUpdateDueDate: (value: number) => void;
 }
 
 export const TodoComp: Component<TodoProps> = (props) => {
@@ -27,36 +31,15 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "todo",
     "onCheck",
     "onDelete",
+    "onEnter",
+    "onUpdateDescription",
+    "onUpdateDueDate",
   ]);
 
-  const [, { updateTodo }] = useDexieCtx();
-
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
-  const [updatedDescription, setUpdatedDescription] = createSignal(
-    local.todo.description,
-  );
-  const [updatedDueDate, setUpdatedDueDate] = createSignal(local.todo.dueDate);
+  const [dueDate, setDueDate] = createSignal(local.todo.dueDate);
 
   const [showInput, { toggle }, setShowInput] = useToggle();
-
-  function handleClickOutside() {
-    if (
-      updatedDescription() !== local.todo.description ||
-      updatedDueDate() !== local.todo.dueDate
-    ) {
-      const updatedTodo: Todo = {
-        ...local.todo,
-        updatedAt: Date.now(),
-        description: updatedDescription() || "New reminder", // give default,
-        dueDate: updatedDueDate(),
-      };
-
-      updateTodo(updatedTodo).catch((error) => {
-        console.error(error);
-      });
-    }
-    toggle();
-  }
 
   function handleOutside(event: MouseEvent) {
     if (
@@ -65,25 +48,31 @@ export const TodoComp: Component<TodoProps> = (props) => {
     ) {
       return;
     }
-    handleClickOutside();
+    toggle();
   }
 
-  createEffect(() => {
-    if (showInput()) {
-      document.addEventListener("mousedown", handleOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleOutside);
-      };
-    }
-    document.removeEventListener("mousedown", handleOutside);
-  });
+  createEffect(
+    on(
+      showInput,
+      (input) => {
+        if (input) {
+          document.addEventListener("click", handleOutside);
+          return;
+        }
+        document.removeEventListener("click", handleOutside);
+      },
+      { defer: true },
+    ),
+  );
+
+  onCleanup(() => document.removeEventListener("click", handleOutside));
 
   const shortenedUUID = truncateText(local.todo.id, 8);
 
   return (
     <div
       class={twMerge(
-        "flex flex-col w-80 py-2 rounded-lg border border-blue-400",
+        "flex w-full flex-col py-2 rounded-lg border border-blue-400",
         local.class,
       )}
       ref={setContainerRef}
@@ -102,19 +91,22 @@ export const TodoComp: Component<TodoProps> = (props) => {
         <div class="flex flex-col flex-1 gap-2 border border-red-300 justify-between">
           <input
             type="text"
-            value={updatedDescription()}
+            value={local.todo.description}
             onFocus={() => setShowInput(true)}
-            onInput={(e) => setUpdatedDescription(e.target.value)}
+            onInput={(e) => local.onUpdateDescription(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleClickOutside();
+                local.onEnter(e);
               }
             }}
           />
           <Show when={showInput()}>
             <DatePickerButton
-              currentDate={updatedDueDate()}
-              onDateChange={setUpdatedDueDate}
+              currentDate={dueDate()}
+              onDateChange={(dueDate) => {
+                setDueDate(dueDate);
+                local.onUpdateDueDate(dueDate);
+              }}
             />
           </Show>
         </div>
