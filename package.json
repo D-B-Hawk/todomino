@@ -20,13 +20,13 @@
     "dayjs": "^1.11.13",
     "dexie": "^4.0.11",
     "solid-js": "^1.9.5",
+    "solid-transition-group": "^0.3.0",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",
     "zod": "^3.25.55"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
-    "@faker-js/faker": "^9.8.0",
     "@solidjs/testing-library": "^0.8.10",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/vite": "^4.1.11",
