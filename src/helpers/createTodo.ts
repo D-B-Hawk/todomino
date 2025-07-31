@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { v4 as uuid } from "uuid";
 
 import { type Todo } from "../types";
@@ -10,7 +9,7 @@ export function createTodo(args: Partial<Todo> = {}): Todo {
     id = uuid(),
     createdAt = now,
     updatedAt = now,
-    description = faker.lorem.sentence(),
+    description = "New reminder",
     list = "reminders",
     ...rest
   } = args;
