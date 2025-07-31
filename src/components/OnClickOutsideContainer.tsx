@@ -4,7 +4,7 @@ import { useOnClickOutside } from "@/hooks";
 interface OnClickOutsideContainerProps
   extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "ref"> {
   onClickOutside: () => void;
-  onDivMount: (div: HTMLDivElement | undefined) => void;
+  onDivMount?: (div: HTMLDivElement | undefined) => void;
 }
 
 export function OnClickOutsideContainer(props: OnClickOutsideContainerProps) {
@@ -13,7 +13,7 @@ export function OnClickOutsideContainer(props: OnClickOutsideContainerProps) {
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
   createEffect(() => {
-    local.onDivMount(divRef());
+    local.onDivMount?.(divRef());
   });
 
   useOnClickOutside(divRef, local.onClickOutside);
