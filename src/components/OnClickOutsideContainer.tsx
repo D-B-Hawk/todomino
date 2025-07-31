@@ -12,7 +12,7 @@ export function OnClickOutsideContainer(props: OnClickOutsideContainerProps) {
 
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
-  createEffect(on(divRef, (ref) => local.onDivMount?.(ref)));
+  createEffect(on(divRef, (ref) => local.onDivMount?.(ref), { defer: true }));
 
   useOnClickOutside(divRef, local.onClickOutside);
 
