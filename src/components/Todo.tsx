@@ -14,15 +14,16 @@ import { truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
-import { DatePickerButton } from "./DatePickerButton";
+import { DatePicker } from "./DatePicker";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
   onCheck: (checked: boolean) => void;
   onDelete: () => void;
-  onEnter: (event: KeyboardEvent) => void;
+  onClickOutside: () => void;
   onUpdateDescription: (value: string) => void;
   onUpdateDueDate: (value: number) => void;
+  popUpMenuDisabled?: boolean;
 }
 
 export const TodoComp: Component<TodoProps> = (props) => {
@@ -31,15 +32,16 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "todo",
     "onCheck",
     "onDelete",
-    "onEnter",
+    "onClickOutside",
     "onUpdateDescription",
     "onUpdateDueDate",
+    "popUpMenuDisabled",
   ]);
 
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [dueDate, setDueDate] = createSignal(local.todo.dueDate);
 
-  const [showInput, { toggle }, setShowInput] = useToggle();
+  const [showDatePicker, { toggle }, setShowDatePicker] = useToggle();
 
   function handleOutside(event: MouseEvent) {
     if (
@@ -49,13 +51,14 @@ export const TodoComp: Component<TodoProps> = (props) => {
       return;
     }
     toggle();
+    local.onClickOutside();
   }
 
   createEffect(
     on(
-      showInput,
-      (input) => {
-        if (input) {
+      showDatePicker,
+      (picker) => {
+        if (picker) {
           document.addEventListener("click", handleOutside);
           return;
         }
@@ -76,6 +79,12 @@ export const TodoComp: Component<TodoProps> = (props) => {
         local.class,
       )}
       ref={setContainerRef}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          local.onClickOutside();
+          toggle();
+        }
+      }}
       {...rest}
     >
       <div class="flex justify-between px-2">
@@ -92,16 +101,12 @@ export const TodoComp: Component<TodoProps> = (props) => {
           <input
             type="text"
             value={local.todo.description}
-            onFocus={() => setShowInput(true)}
+            placeholder="New Reminder"
+            onFocus={() => setShowDatePicker(true)}
             onInput={(e) => local.onUpdateDescription(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                local.onEnter(e);
-              }
-            }}
           />
-          <Show when={showInput()}>
-            <DatePickerButton
+          <Show when={showDatePicker()}>
+            <DatePicker
               currentDate={dueDate()}
               onDateChange={(dueDate) => {
                 setDueDate(dueDate);
@@ -110,14 +115,14 @@ export const TodoComp: Component<TodoProps> = (props) => {
             />
           </Show>
         </div>
-        <PopUpMenu class="mt-1">
+        <PopUpMenu class="mt-1" disabled={local.popUpMenuDisabled}>
           <menu>
             <li>
               <button
                 class="border p-2 bg-red-500 text-white cursor-pointer"
                 onClick={local.onDelete}
               >
-                Delete Todo
+                Delete
               </button>
             </li>
           </menu>
