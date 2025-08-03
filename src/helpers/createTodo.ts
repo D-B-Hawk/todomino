@@ -9,7 +9,7 @@ export function createTodo(args: Partial<Todo> = {}): Todo {
     id = uuid(),
     createdAt = now,
     updatedAt = now,
-    description = "New reminder",
+    description = "",
     list = "reminders",
     ...rest
   } = args;
