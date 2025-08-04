@@ -18,13 +18,14 @@ import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
 import { getDependents, getTodosCollectionByListName } from "./helpers";
 import { updateTodoDependents } from "./transactions";
+import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
 type DexCtx = [
   {
     lists: Accessor<List[]>;
     listsTodoCount: Accessor<ListTodoCount>;
     chosenListTodos: Accessor<{ complete: Todo[]; incomplete: Todo[] }>;
-    chosenList: Accessor<List | undefined>;
+    chosenList: Accessor<List>;
   },
   {
     addTodo: (todo: Todo) => Promise<void>;
@@ -45,7 +46,12 @@ export function DexieProvider(props: ParentProps) {
     complete: [],
     incomplete: [],
   });
-  const chosenList = useObservable(chosenListObservable, createList()); // this will default to reminders
+
+  const chosenList = useObservable(
+    chosenListObservable,
+    INITIAL_LISTS_MAP["reminders"],
+  );
+
   const listsTodoCount = useObservable(listTodoCountObservable, {
     ...INIT_LIST_TODO_COUNT,
   });

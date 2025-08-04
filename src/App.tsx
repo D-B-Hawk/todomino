@@ -2,22 +2,16 @@ import { createSignal, Show } from "solid-js";
 import { useToggle } from "@/hooks";
 import { ListView, TodosView } from "@/views";
 import { Modal, AddListForm, ConfirmListDelete } from "@/components";
-import type { ListName } from "@/types";
+import type { ListAction, ListName } from "@/types";
 import { useDexieCtx } from "@/context";
-
-enum ListAction {
-  ADD_LIST = "addList",
-  DELETE_LIST = "deleteList",
-}
+import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
 export function App() {
   const [showModal, { toggle: toggleModal }] = useToggle();
-  const [modalContent, setModalContent] = createSignal<ListAction>(
-    ListAction.ADD_LIST,
-  );
+  const [modalContent, setModalContent] = createSignal<ListAction>("ADD_LIST");
   const [listToDelete, setListToDelete] = createSignal<ListName>();
 
-  const [, { deleteList }] = useDexieCtx();
+  const [, { deleteList, chooseList }] = useDexieCtx();
 
   function handleListDelete() {
     const doomedList = listToDelete();
@@ -27,7 +21,10 @@ export function App() {
     }
 
     deleteList(doomedList)
-      .then(toggleModal)
+      .then(() => {
+        toggleModal();
+        chooseList(INITIAL_LISTS_MAP["reminders"]);
+      })
       .catch((error) => console.error(error));
   }
 
@@ -43,22 +40,20 @@ export function App() {
     <>
       <div class="flex h-screen max-h-screen overflow-hidden dark:bg-black">
         <ListView
-          onAddList={() => handleListAction(ListAction.ADD_LIST)}
-          onDeleteList={(listName) =>
-            handleListAction(ListAction.DELETE_LIST, listName)
-          }
+          onAddList={() => handleListAction("ADD_LIST")}
+          onDeleteList={(listName) => handleListAction("DELETE_LIST", listName)}
         />
         <TodosView />
       </div>
       <Modal showModal={showModal()}>
-        <Show when={modalContent() === ListAction.ADD_LIST}>
+        <Show when={modalContent() === "ADD_LIST"}>
           <AddListForm
             onCloseForm={toggleModal}
             onOutsideFormClick={toggleModal}
             onFormSubmitSuccess={toggleModal}
           />
         </Show>
-        <Show when={modalContent() === ListAction.DELETE_LIST}>
+        <Show when={modalContent() === "DELETE_LIST"}>
           <ConfirmListDelete
             onConfirmDelete={handleListDelete}
             onOutsidePopupClick={toggleModal}

@@ -4,21 +4,23 @@ import type {
   ListName,
   ReadOnlyListName,
   MainListName,
+  ListAction,
+  List,
 } from "@/constants/lists";
 import type { PickerColor } from "@/constants/colors";
-export type { IconKey, ListName, ReadOnlyListName, MainListName, PickerColor };
+export type {
+  IconKey,
+  ListName,
+  ReadOnlyListName,
+  MainListName,
+  PickerColor,
+  ListAction,
+  List,
+};
 
 export type FormSubmitEvent = SubmitEvent & {
   currentTarget: HTMLFormElement;
   target: DOMElement;
-};
-
-export type List = {
-  name: ListName;
-  color: PickerColor;
-  icon: IconKey;
-  createdAt: number;
-  updatedAt: number;
 };
 
 export type Todo = {
