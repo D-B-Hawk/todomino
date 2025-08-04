@@ -1,9 +1,9 @@
 import { createEffect, createSignal, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
-import type { Todo } from "@/types";
+import type { ListName, Todo } from "@/types";
 import { useDexieCtx } from "@/context";
 import { useToggle } from "@/hooks";
-import { createTodo } from "@/helpers";
+import { createTodo, isReadOnlyListName } from "@/helpers";
 import {
   TodoComp,
   ScrollableContainer,
@@ -54,6 +54,14 @@ export function TodosView() {
 
   const showAddList = () => chosenList().name !== "completed";
 
+  const listName = (): ListName => {
+    const chosenListName = chosenList().name;
+    if (isReadOnlyListName(chosenListName)) {
+      return "reminders";
+    }
+    return chosenListName;
+  };
+
   return (
     <div class="flex flex-col w-full">
       <Show when={chosenList()}>
@@ -100,7 +108,7 @@ export function TodosView() {
               if (newTodo()) {
                 return;
               }
-              setNewTodo(createTodo({ list: chosenList().name }));
+              setNewTodo(createTodo({ list: listName() }));
             }}
             class="flex gap-2 mt-auto"
             iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
