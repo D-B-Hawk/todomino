@@ -52,6 +52,8 @@ export function TodosView() {
     setNewTodo(undefined);
   }
 
+  const showAddList = () => chosenList().name !== "completed";
+
   return (
     <div class="flex flex-col w-full">
       <Show when={chosenList()}>
@@ -92,18 +94,20 @@ export function TodosView() {
             )}
           </Show>
         </Transition>
-        <IconButton
-          onClick={() => {
-            if (newTodo()) {
-              return;
-            }
-            setNewTodo(createTodo({ list: chosenList().name }));
-          }}
-          class="flex gap-2 mt-auto"
-          iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
-        >
-          Add Todo
-        </IconButton>
+        <Show when={showAddList()}>
+          <IconButton
+            onClick={() => {
+              if (newTodo()) {
+                return;
+              }
+              setNewTodo(createTodo({ list: chosenList().name }));
+            }}
+            class="flex gap-2 mt-auto"
+            iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
+          >
+            Add Todo
+          </IconButton>
+        </Show>
       </ScrollableContainer>
     </div>
   );
