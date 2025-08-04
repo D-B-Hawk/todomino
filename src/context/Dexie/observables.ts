@@ -6,6 +6,7 @@ import {
 } from "./helpers";
 import type { ListName } from "@/types";
 import { createList } from "@/helpers";
+import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
 export type ListTodoCount = Record<ListName, number>;
 
@@ -47,5 +48,7 @@ export const listTodoCountObservable = liveQuery(() =>
 );
 
 export const chosenListObservable = liveQuery(async () => {
-  return db.chosenList.toCollection().first();
+  const chosenList = await db.chosenList.toCollection().first();
+  const defaultList = INITIAL_LISTS_MAP["reminders"];
+  return chosenList ?? defaultList;
 });

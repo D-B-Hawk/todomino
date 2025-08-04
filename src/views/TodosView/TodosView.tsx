@@ -97,7 +97,7 @@ export function TodosView() {
             if (newTodo()) {
               return;
             }
-            setNewTodo(createTodo());
+            setNewTodo(createTodo({ list: chosenList().name }));
           }}
           class="flex gap-2 mt-auto"
           iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
