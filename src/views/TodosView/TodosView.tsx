@@ -37,7 +37,8 @@ export function TodosView() {
       const defaultTodo = createTodo();
       if (
         freshTodo.description.trim() !== defaultTodo.description ||
-        freshTodo.dueDate !== defaultTodo.dueDate
+        freshTodo.dueDate !== defaultTodo.dueDate ||
+        freshTodo.list !== defaultTodo.list
       ) {
         setTranstionName("add-todo");
         addTodo({
@@ -96,6 +97,9 @@ export function TodosView() {
                   }
                   onUpdateDueDate={(dueDate) =>
                     setNewTodo(() => ({ ...todo(), dueDate }))
+                  }
+                  onUpdateListName={(list) =>
+                    setNewTodo(() => ({ ...todo(), list }))
                   }
                 />
               </OnClickOutsideContainer>
