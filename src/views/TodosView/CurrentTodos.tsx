@@ -22,13 +22,14 @@ export function CurrentTodos(props: CurrentTodosProps) {
     );
   }
 
-  async function handleClickOutside(currentTodo: Todo) {
+  function handleClickOutside(currentTodo: Todo) {
     const edited = editedTodo();
     if (!edited) return;
 
     if (
       edited.description !== currentTodo.description ||
-      edited.dueDate !== currentTodo.dueDate
+      edited.dueDate !== currentTodo.dueDate ||
+      edited.list !== currentTodo.list
     ) {
       const updatedTodo: Todo = {
         ...edited,
@@ -68,6 +69,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
             setEditedTodo({ ...todo, description })
           }
           onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
+          onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
           onClickOutside={() => handleClickOutside(todo)}
         />
       )}
