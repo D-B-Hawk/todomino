@@ -3,8 +3,11 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./IconButton";
 import { useToggle } from "@/hooks";
 import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
+import type { IconProps } from "./Icon";
 
 interface PopUpMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  iconProps?: IconProps;
+  clickOutsideContainerClass?: string;
   disabled?: boolean;
 }
 
@@ -18,19 +21,30 @@ export function PopUpMenu(props: PopUpMenuProps) {
     toggle();
   }
 
-  const [local, rest] = splitProps(props, ["class", "disabled"]);
+  const [local, icon, container, rest] = splitProps(
+    props,
+    ["class", "disabled"],
+    ["iconProps"],
+    ["clickOutsideContainerClass"],
+  );
 
   return (
     <div class={twMerge("relative", local.class)} {...rest}>
       <IconButton
         onClick={handleClick}
         disabled={local.disabled}
-        iconProps={{ icon: "ELLIPSIS", class: "h-4" }}
+        iconProps={{
+          icon: icon.iconProps?.icon ?? "ELLIPSIS",
+          class: twMerge("h-4", icon.iconProps?.class),
+        }}
       />
       <Show when={menuOpen()}>
         <OnClickOutsideContainer
           onClickOutside={toggle}
-          class="absolute max-w-fit -top-5 right-5 p-2 border bg-white"
+          class={twMerge(
+            "absolute max-w-fit -top-5 right-5 p-2 border bg-white",
+            container.clickOutsideContainerClass,
+          )}
         >
           {props.children}
         </OnClickOutsideContainer>
