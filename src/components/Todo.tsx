@@ -9,12 +9,13 @@ import {
   type JSX,
 } from "solid-js";
 import { twMerge } from "tailwind-merge";
-import { type Todo } from "@/types";
+import { type ListName, type Todo } from "@/types";
 import { truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
 import { DatePicker } from "./DatePicker";
+import { ListPicker } from "./ListPicker";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -23,6 +24,7 @@ export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   onClickOutside: () => void;
   onUpdateDescription: (value: string) => void;
   onUpdateDueDate: (value: number) => void;
+  onUpdateListName: (listName: ListName) => void;
   popUpMenuDisabled?: boolean;
 }
 
@@ -35,11 +37,13 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "onClickOutside",
     "onUpdateDescription",
     "onUpdateDueDate",
+    "onUpdateListName",
     "popUpMenuDisabled",
   ]);
 
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [dueDate, setDueDate] = createSignal(local.todo.dueDate);
+  const [listName, setListName] = createSignal(local.todo.list);
 
   const [showDatePicker, { toggle }, setShowDatePicker] = useToggle();
 
@@ -106,16 +110,25 @@ export const TodoComp: Component<TodoProps> = (props) => {
             onInput={(e) => local.onUpdateDescription(e.target.value)}
           />
           <Show when={showDatePicker()}>
-            <DatePicker
-              currentDate={dueDate()}
-              onDateChange={(dueDate) => {
-                setDueDate(dueDate);
-                local.onUpdateDueDate(dueDate);
-              }}
-            />
+            <div class="flex gap-2">
+              <DatePicker
+                currentDate={dueDate()}
+                onDateChange={(dueDate) => {
+                  setDueDate(dueDate);
+                  local.onUpdateDueDate(dueDate);
+                }}
+              />
+              <ListPicker
+                todoListName={listName()}
+                onListOptionClick={(listName) => {
+                  setListName(listName);
+                  local.onUpdateListName(listName);
+                }}
+              />
+            </div>
           </Show>
         </div>
-        <PopUpMenu class="mt-1" disabled={local.popUpMenuDisabled}>
+        <PopUpMenu disabled={local.popUpMenuDisabled}>
           <menu>
             <li>
               <button
