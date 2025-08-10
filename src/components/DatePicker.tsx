@@ -1,15 +1,13 @@
-import { createEffect, createSignal, on, onCleanup, Show } from "solid-js";
+import { createEffect, createSignal, on, onCleanup } from "solid-js";
 
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import isTomorrow from "dayjs/plugin/isTomorrow";
 import isYesterday from "dayjs/plugin/isYesterday";
-import { Icon } from "./Icon";
-import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
-import { useToggle } from "@/hooks";
 
 import "wc-datepicker/dist/themes/light.css";
 import { isSelectDateEvent } from "@/helpers";
+import { PopUpMenu } from "./PopUpMenu";
 
 dayjs.extend(isToday);
 dayjs.extend(isTomorrow);
@@ -23,11 +21,8 @@ interface DatePickerProps {
 export function DatePicker(props: DatePickerProps) {
   const [datePickerRef, setDatePickerRef] =
     createSignal<HTMLWcDatepickerElement>();
-  const [showDatePicker, { toggle }] = useToggle();
 
-  function getDisplayedDate(date?: number) {
-    if (!date) return;
-
+  function getDisplayedDate(date: number) {
     const day = dayjs(date);
     if (day.isTomorrow()) {
       return "Tomorrow";
@@ -41,15 +36,20 @@ export function DatePicker(props: DatePickerProps) {
     return day.format("M/D/YY");
   }
 
-  const displayedPick = () =>
-    getDisplayedDate(props.currentDate) ?? "Pick a Date";
+  function displayedPick() {
+    if (props.currentDate) {
+      return getDisplayedDate(props.currentDate);
+    }
+    return "Pick a Date";
+  }
 
-  const getDateInputValue = () => {
-    const theDate = props.currentDate
-      ? dayjs(props.currentDate).toDate()
-      : undefined;
+  function getDateInputValue() {
+    let theDate: Date | undefined = undefined;
+    if (props.currentDate) {
+      theDate = dayjs(props.currentDate).toDate();
+    }
     return theDate;
-  };
+  }
 
   function handleDateEvent(e: Event) {
     if (!isSelectDateEvent(e)) {
@@ -81,23 +81,13 @@ export function DatePicker(props: DatePickerProps) {
   });
 
   return (
-    <div class="relative inline-block border">
-      <Show when={showDatePicker()}>
-        <OnClickOutsideContainer
-          onClickOutside={toggle}
-          class="absolute top-10"
-        >
-          <wc-datepicker value={getDateInputValue()} ref={setDatePickerRef} />
-        </OnClickOutsideContainer>
-      </Show>
-      <button
-        type="button"
-        class="flex items-center gap-2 border rounded p-2 bg-white hover:bg-gray-50 text-xs"
-        onClick={toggle}
-      >
-        <Icon icon="CALENDAR" class="w-4" />
-        {displayedPick()}
-      </button>
-    </div>
+    <PopUpMenu
+      class="border border-green-300"
+      clickOutsideContainerClass="left-0 top-9 w-fit"
+      buttonIcon="CALENDAR"
+      buttonLabel={displayedPick()}
+    >
+      <wc-datepicker value={getDateInputValue()} ref={setDatePickerRef} />
+    </PopUpMenu>
   );
 }

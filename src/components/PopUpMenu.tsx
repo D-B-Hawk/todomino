@@ -14,13 +14,6 @@ interface PopUpMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
 export function PopUpMenu(props: PopUpMenuProps) {
   const [menuOpen, { toggle }] = useToggle();
 
-  function handleClick() {
-    if (menuOpen()) {
-      return;
-    }
-    toggle();
-  }
-
   const [local, buttonProps, container, rest] = splitProps(
     props,
     ["class", "disabled"],
@@ -32,7 +25,12 @@ export function PopUpMenu(props: PopUpMenuProps) {
     <div class={twMerge("relative flex", local.class)} {...rest}>
       <IconButton
         class="gap-1 items-center"
-        onClick={handleClick}
+        onClick={() => {
+          if (menuOpen()) {
+            return;
+          }
+          toggle();
+        }}
         disabled={local.disabled}
         iconProps={{
           icon: buttonProps.buttonIcon ?? "ELLIPSIS",
