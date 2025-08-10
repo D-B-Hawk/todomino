@@ -82,10 +82,15 @@ export function DatePicker(props: DatePickerProps) {
 
   return (
     <PopUpMenu
-      class="border border-green-300"
-      clickOutsideContainerClass="left-0 top-9 w-fit"
-      buttonIcon="CALENDAR"
-      buttonLabel={displayedPick()}
+      class="text-sm p-1 rounded-md h-full"
+      clickOutsideContainerClass="left-1 top-10 w-fit"
+      iconButtonProps={{
+        iconProps: {
+          icon: "CALENDAR",
+        },
+        children: displayedPick(),
+        class: "bg-black/5 hover:bg-black/15",
+      }}
     >
       <wc-datepicker value={getDateInputValue()} ref={setDatePickerRef} />
     </PopUpMenu>
