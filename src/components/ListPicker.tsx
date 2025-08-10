@@ -3,6 +3,7 @@ import { useDexieCtx } from "@/context";
 import { isReadOnlyListName } from "@/helpers";
 import { PopUpMenu } from "./PopUpMenu";
 import type { ListName } from "@/types";
+import { PICKER_COLORS } from "@/constants/colors";
 
 type ListPickerProps = {
   todoListName: ListName;
@@ -13,22 +14,35 @@ export function ListPicker(props: ListPickerProps) {
   const [{ lists }] = useDexieCtx();
 
   const listOptions = () =>
-    lists().filter((list) => !isReadOnlyListName(list.name));
+    lists().filter(
+      (list) =>
+        !isReadOnlyListName(list.name) && list.name !== props.todoListName,
+    );
 
   return (
     <PopUpMenu
-      class="border border-green-300"
-      clickOutsideContainerClass="left-0 top-9 w-fit"
-      buttonIcon="TRELLO"
-      buttonLabel={props.todoListName}
+      class="p-1 rounded-md h-full"
+      clickOutsideContainerClass="left-1 top-10"
+      iconButtonProps={{
+        iconProps: {
+          icon: "TRELLO",
+        },
+        children: props.todoListName,
+        class: "bg-black/5 hover:bg-black/15",
+      }}
     >
-      <menu>
+      <menu class="flex flex-col gap-1">
         <For each={listOptions()}>
           {(list) => (
             <li>
               <button
-                class="border p-2 bg-red-500 text-white cursor-pointer"
-                onClick={() => props.onListOptionClick(list.name)}
+                type="button"
+                class="flex flex-1 p-2 text-white rounded-md text-nowrap cursor-pointer"
+                style={{ "background-color": PICKER_COLORS[list.color] }}
+                onClick={(e) => {
+                  e.stopImmediatePropagation();
+                  props.onListOptionClick(list.name);
+                }}
               >
                 {list.name}
               </button>
