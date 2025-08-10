@@ -11,7 +11,7 @@ export function IconButton(props: IconButtonProps) {
   const [local, buttonProps] = splitProps(props, ["iconProps", "class"]);
   return (
     <button
-      class={twMerge("flex rounded-full cursor-pointer", local.class)}
+      class={twMerge("flex cursor-pointer", local.class)}
       type="button"
       {...buttonProps}
     >
