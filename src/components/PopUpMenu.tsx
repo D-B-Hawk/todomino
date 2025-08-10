@@ -5,8 +5,7 @@ import { useToggle } from "@/hooks";
 import { OnClickOutsideContainer } from "./OnClickOutsideContainer";
 
 interface PopUpMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  buttonIcon?: IconButtonProps["iconProps"]["icon"];
-  buttonLabel?: string;
+  iconButtonProps?: IconButtonProps;
   clickOutsideContainerClass?: string;
   disabled?: boolean;
 }
@@ -14,38 +13,39 @@ interface PopUpMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
 export function PopUpMenu(props: PopUpMenuProps) {
   const [menuOpen, { toggle }] = useToggle();
 
-  function handleClick() {
-    if (menuOpen()) {
-      return;
-    }
-    toggle();
-  }
-
   const [local, buttonProps, container, rest] = splitProps(
     props,
     ["class", "disabled"],
-    ["buttonIcon", "buttonLabel"],
+    ["iconButtonProps"],
     ["clickOutsideContainerClass"],
   );
 
   return (
     <div class={twMerge("relative flex", local.class)} {...rest}>
       <IconButton
-        class="gap-1 items-center"
-        onClick={handleClick}
+        class={twMerge(
+          "gap-1 p-1 rounded-md items-center",
+          buttonProps.iconButtonProps?.class,
+        )}
+        onClick={() => {
+          if (menuOpen()) {
+            return;
+          }
+          toggle();
+        }}
         disabled={local.disabled}
         iconProps={{
-          icon: buttonProps.buttonIcon ?? "ELLIPSIS",
-          class: "w-4",
+          icon: buttonProps?.iconButtonProps?.iconProps?.icon ?? "ELLIPSIS",
+          class: twMerge("w-4", buttonProps?.iconButtonProps?.iconProps?.class),
         }}
       >
-        <Show when={buttonProps.buttonLabel}>{buttonProps.buttonLabel}</Show>
+        {buttonProps?.iconButtonProps?.children}
       </IconButton>
       <Show when={menuOpen()}>
         <OnClickOutsideContainer
           onClickOutside={toggle}
           class={twMerge(
-            "absolute max-w-fit -top-5 right-5 p-2 border bg-white z-10",
+            "absolute max-w-fit -top-5 right-5 z-10",
             container.clickOutsideContainerClass,
           )}
         >
