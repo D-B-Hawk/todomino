@@ -34,7 +34,7 @@ export function TodosView() {
   function handleCreateTodo() {
     const freshTodo = newTodo();
     if (freshTodo) {
-      const defaultTodo = createTodo();
+      const defaultTodo = createTodo({ list: getListname() });
       if (
         freshTodo.description.trim() !== defaultTodo.description ||
         freshTodo.dueDate !== defaultTodo.dueDate ||
@@ -55,13 +55,13 @@ export function TodosView() {
 
   const showAddList = () => chosenList().name !== "completed";
 
-  const listName = (): ListName => {
+  function getListname(): ListName {
     const chosenListName = chosenList().name;
     if (isReadOnlyListName(chosenListName)) {
       return "reminders";
     }
     return chosenListName;
-  };
+  }
 
   return (
     <div class="flex flex-col w-full">
@@ -112,7 +112,7 @@ export function TodosView() {
               if (newTodo()) {
                 return;
               }
-              setNewTodo(createTodo({ list: listName() }));
+              setNewTodo(createTodo({ list: getListname() }));
             }}
             class="flex gap-2 mt-auto"
             iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
