@@ -9,3 +9,4 @@ export { isConstantListName } from "./isConstantListName";
 export { noop } from "./noop";
 export { truncateText } from "./truncateText";
 export { isSelectDateEvent } from "./isSelectDateEvent";
+export { getCurrentTime } from "./getCurrentTime";
