@@ -111,7 +111,7 @@ export function AddListForm(props: AddListFormProps) {
               <IconButton
                 onClick={() => setIconKey(key)}
                 style={{ "background-color": PICKER_COLORS[iconColor()] }}
-                class="p-2"
+                class="p-2 rounded-full"
                 iconProps={{ icon: key, stroke: "white", class: "w-6" }}
               />
             )}

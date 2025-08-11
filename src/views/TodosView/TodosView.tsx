@@ -3,7 +3,7 @@ import { Transition } from "solid-transition-group";
 import type { ListName, Todo } from "@/types";
 import { useDexieCtx } from "@/context";
 import { useToggle } from "@/hooks";
-import { createTodo, isReadOnlyListName } from "@/helpers";
+import { createTodo, getCurrentTime, isReadOnlyListName } from "@/helpers";
 import {
   TodoComp,
   ScrollableContainer,
@@ -34,7 +34,10 @@ export function TodosView() {
   function handleCreateTodo() {
     const freshTodo = newTodo();
     if (freshTodo) {
-      const defaultTodo = createTodo({ list: getListname() });
+      const defaultTodo = createTodo({
+        list: getListname(),
+        dueDate: getTime(),
+      });
       if (
         freshTodo.description.trim() !== defaultTodo.description ||
         freshTodo.dueDate !== defaultTodo.dueDate ||
@@ -44,7 +47,6 @@ export function TodosView() {
         addTodo({
           ...freshTodo,
           description: freshTodo.description || "New reminder", // give default
-          updatedAt: Date.now(),
         })
           .catch((error) => console.error(error))
           .finally(() => setTranstionName("slide-fade"));
@@ -61,6 +63,16 @@ export function TodosView() {
       return "reminders";
     }
     return chosenListName;
+  }
+
+  function getTime() {
+    const chosenListName = chosenList().name;
+    if (chosenListName === "today") {
+      const [todaysDate] = getCurrentTime();
+      todaysDate.setSeconds(0, 0); // standardize seconds
+      return todaysDate.valueOf();
+    }
+    return undefined;
   }
 
   return (
@@ -112,7 +124,9 @@ export function TodosView() {
               if (newTodo()) {
                 return;
               }
-              setNewTodo(createTodo({ list: getListname() }));
+              setNewTodo(
+                createTodo({ list: getListname(), dueDate: getTime() }),
+              );
             }}
             class="flex gap-2 mt-auto"
             iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}

@@ -128,11 +128,14 @@ export const TodoComp: Component<TodoProps> = (props) => {
             </div>
           </Show>
         </div>
-        <PopUpMenu disabled={local.popUpMenuDisabled}>
+        <PopUpMenu
+          disabled={local.popUpMenuDisabled}
+          clickOutsideContainerClass="top-1/2 right-6.5 -translate-y-1/2"
+        >
           <menu>
             <li>
               <button
-                class="border p-2 bg-red-500 text-white cursor-pointer"
+                class="p-2 rounded-md bg-red-500 text-white cursor-pointer"
                 onClick={local.onDelete}
               >
                 Delete
