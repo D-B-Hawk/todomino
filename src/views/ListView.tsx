@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 import type { ListName } from "@/types";
-import { ListSelector, Icon } from "@/components";
+import { ListSelector, IconButton } from "@/components";
 import { useDexieCtx } from "@/context";
 
 type ListViewProps = {
@@ -30,10 +30,13 @@ export function ListView(props: ListViewProps) {
           )}
         </For>
       </div>
-      <button onClick={props.onAddList} class="flex gap-2 self-start">
-        <Icon icon="PLUS_CIRCLE" class="w-6 h-6" />
-        <span>Add List</span>
-      </button>
+      <IconButton
+        onClick={props.onAddList}
+        class="self-start gap-2"
+        iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
+      >
+        Add List
+      </IconButton>
     </div>
   );
 }

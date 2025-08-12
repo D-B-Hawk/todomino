@@ -11,3 +11,5 @@ export { TodoComp } from "./Todo";
 export { TodoForm } from "./TodoForm";
 export { ScrollableContainer } from "./ScrollableContainer";
 export { OnClickOutsideContainer } from "./OnClickOutsideContainer";
+export { ColoredButton } from "./ColoredButton";
+export { ClosableContainer } from "./ClosableContainer";

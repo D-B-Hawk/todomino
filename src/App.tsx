@@ -53,11 +53,14 @@ export function App() {
             onFormSubmitSuccess={toggleModal}
           />
         </Show>
-        <Show when={modalContent() === "DELETE_LIST"}>
-          <ConfirmListDelete
-            onConfirmDelete={handleListDelete}
-            onOutsidePopupClick={toggleModal}
-          />
+        <Show when={modalContent() === "DELETE_LIST" && listToDelete()}>
+          {(listName) => (
+            <ConfirmListDelete
+              listName={listName()}
+              onConfirmDelete={handleListDelete}
+              onOutsidePopupClick={toggleModal}
+            />
+          )}
         </Show>
       </Modal>
     </>
