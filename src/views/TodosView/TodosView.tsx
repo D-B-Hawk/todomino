@@ -55,6 +55,13 @@ export function TodosView() {
     setNewTodo(undefined);
   }
 
+  function handleClick() {
+    if (newTodo()) {
+      return;
+    }
+    setNewTodo(createTodo({ list: getListname(), dueDate: getTime() }));
+  }
+
   const showAddList = () => chosenList().name !== "completed";
 
   function getListname(): ListName {
@@ -120,15 +127,8 @@ export function TodosView() {
         </Transition>
         <Show when={showAddList()}>
           <IconButton
-            onClick={() => {
-              if (newTodo()) {
-                return;
-              }
-              setNewTodo(
-                createTodo({ list: getListname(), dueDate: getTime() }),
-              );
-            }}
-            class="flex gap-2 mt-auto"
+            onClick={handleClick}
+            class="gap-2 mt-auto"
             iconProps={{ icon: "PLUS_CIRCLE", class: "w-6" }}
           >
             Add Todo

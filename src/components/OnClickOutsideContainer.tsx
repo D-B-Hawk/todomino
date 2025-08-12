@@ -1,7 +1,7 @@
 import { createEffect, createSignal, on, splitProps, type JSX } from "solid-js";
 import { useOnClickOutside } from "@/hooks";
 
-interface OnClickOutsideContainerProps
+export interface OnClickOutsideContainerProps
   extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "ref"> {
   onClickOutside: () => void;
   onDivMount?: (div: HTMLDivElement | undefined) => void;
