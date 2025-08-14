@@ -30,8 +30,8 @@ export type Todo = {
   updatedAt: number;
   dueDate?: number;
   completedAt?: number;
-  dependsOn?: Todo["id"];
-  dependent?: Todo["id"];
+  dependsOnTodo?: Todo;
+  dependentTodo?: Todo;
   list: ListName;
 };
 
