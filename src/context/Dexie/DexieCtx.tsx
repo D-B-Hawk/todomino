@@ -16,7 +16,7 @@ import {
 import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
 import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
-import { getDependents, getTodosCollectionByListName } from "./helpers";
+import { getTodosCollectionByListName } from "./helpers";
 import { updateTodoDependents } from "./transactions";
 import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
@@ -102,14 +102,13 @@ export function DexieProvider(props: ParentProps) {
   }
 
   async function addTodo(todo: Todo) {
-    const { dependsOnTodo } = await getDependents(todo);
-
+    const { dependsOnTodo } = todo;
     return db.transaction("rw", db.todos, async () => {
       await db.todos.put(todo);
       if (dependsOnTodo) {
         await db.todos.put({
           ...dependsOnTodo,
-          dependent: todo.id,
+          dependentTodo: todo,
           updatedAt: Date.now(),
         });
       }
@@ -139,8 +138,8 @@ export function DexieProvider(props: ParentProps) {
     return db.transaction("rw", db.todos, async (tx) => {
       tx.todos.update(todo, {
         updatedAt: now,
-        dependent: undefined,
-        dependsOn: undefined,
+        dependentTodo: undefined,
+        dependsOnTodo: undefined,
         completedAt,
       });
       updateTodoDependents(tx, todo);
