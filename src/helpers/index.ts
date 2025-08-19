@@ -10,3 +10,5 @@ export { noop } from "./noop";
 export { truncateText } from "./truncateText";
 export { isSelectDateEvent } from "./isSelectDateEvent";
 export { getCurrentTime } from "./getCurrentTime";
+export { deepEqual } from "./deepEqual";
+export { isEqualExcludingKeys } from "./isEqualExcludingKeys";
