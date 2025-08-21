@@ -3,6 +3,7 @@ import { useDexieCtx } from "@/context";
 import { useAsyncDebounce } from "@/hooks";
 import { TodoComp } from "@/components";
 import type { Todo } from "@/types";
+import { deepEqual } from "@/helpers";
 
 type CurrentTodosProps = {
   showComplete: boolean;
@@ -12,7 +13,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
   const [editedTodo, setEditedTodo] = createSignal<Todo>();
 
   const [
-    { chosenListTodos, chosenList },
+    { listsCompleteIncompleteTodos, chosenList },
     { handleTodoCheck, deleteTodo, updateTodo },
   ] = useDexieCtx();
 
@@ -26,11 +27,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
     const edited = editedTodo();
     if (!edited) return;
 
-    if (
-      edited.description !== currentTodo.description ||
-      edited.dueDate !== currentTodo.dueDate ||
-      edited.list !== currentTodo.list
-    ) {
+    if (!deepEqual(edited, currentTodo)) {
       const updatedTodo: Todo = {
         ...edited,
         updatedAt: Date.now(),
@@ -46,7 +43,8 @@ export function CurrentTodos(props: CurrentTodosProps) {
   }
 
   const todos = () => {
-    const { complete, incomplete } = chosenListTodos();
+    const { complete, incomplete } =
+      listsCompleteIncompleteTodos()[chosenList().name];
     if (chosenList()?.name === "completed") {
       return complete;
     }
