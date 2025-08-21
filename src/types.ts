@@ -28,11 +28,10 @@ export type Todo = {
   description: string;
   createdAt: number;
   updatedAt: number;
+  list: ListName;
   dueDate?: number;
   completedAt?: number;
-  dependsOn?: Todo["id"];
-  dependent?: Todo["id"];
-  list: ListName;
+  dominoIndex?: number;
 };
 
 export type TodoList = List & {
