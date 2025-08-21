@@ -1,9 +1,4 @@
-import {
-  db,
-  getTodosWhereKey,
-  orWhereIndexOrPrimary,
-  sortTodosByKey,
-} from "@/db";
+import { getTodosWhereKey, sortTodosByKey } from "@/db";
 import { type ListName, type Todo } from "@/types";
 import type { Collection, InsertType } from "dexie";
 
@@ -12,8 +7,7 @@ export function getTodosCollectionByListName(listName: ListName) {
     return getTodosWhereKey("completedAt").above(0);
   }
   if (listName === "todomino") {
-    const todos = getTodosWhereKey("dependent").notEqual("");
-    return orWhereIndexOrPrimary("dependsOn", todos).notEqual("");
+    return getTodosWhereKey("dominoIndex").notEqual("");
   }
   if (listName === "today") {
     return getTodosWhereKey("dueDate").belowOrEqual(Date.now());
@@ -39,18 +33,4 @@ export async function getCompleteIncompleteTodos(
   });
 
   return { complete, incomplete };
-}
-
-export async function getDependents(todo: Todo) {
-  // defaulting dependent and depends on to a string as bulkGet is looking for a string
-  const { dependent = "", dependsOn = "" } = todo;
-  const [dependentTodo, dependsOnTodo] = await db.todos.bulkGet([
-    dependent,
-    dependsOn,
-  ]);
-
-  return {
-    dependentTodo,
-    dependsOnTodo,
-  };
 }

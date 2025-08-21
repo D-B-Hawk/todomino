@@ -20,8 +20,7 @@ const TODO_KEY_MAP: Record<keyof Todo, keyof Todo> = {
   updatedAt: "updatedAt",
   dueDate: "dueDate",
   completedAt: "completedAt",
-  dependent: "dependent",
-  dependsOn: "dependsOn",
+  dominoIndex: "dominoIndex",
 };
 
 const TODO_KEYS = Object.values(TODO_KEY_MAP);

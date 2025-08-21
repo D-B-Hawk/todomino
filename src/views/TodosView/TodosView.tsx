@@ -3,7 +3,12 @@ import { Transition } from "solid-transition-group";
 import type { ListName, Todo } from "@/types";
 import { useDexieCtx } from "@/context";
 import { useToggle } from "@/hooks";
-import { createTodo, getCurrentTime, isReadOnlyListName } from "@/helpers";
+import {
+  createTodo,
+  getCurrentTime,
+  isEqualExcludingKeys,
+  isReadOnlyListName,
+} from "@/helpers";
 import {
   TodoComp,
   ScrollableContainer,
@@ -15,7 +20,8 @@ import "./todosView.css";
 import { CurrentTodos } from "./CurrentTodos";
 
 export function TodosView() {
-  const [{ chosenListTodos, chosenList }, { addTodo }] = useDexieCtx();
+  const [{ listsCompleteIncompleteTodos, chosenList }, { addTodo }] =
+    useDexieCtx();
 
   const [showComplete, { toggle }, setShowComplete] = useToggle();
 
@@ -39,9 +45,11 @@ export function TodosView() {
         dueDate: getTime(),
       });
       if (
-        freshTodo.description.trim() !== defaultTodo.description ||
-        freshTodo.dueDate !== defaultTodo.dueDate ||
-        freshTodo.list !== defaultTodo.list
+        !isEqualExcludingKeys(freshTodo, defaultTodo, [
+          "id",
+          "createdAt",
+          "updatedAt",
+        ])
       ) {
         setTranstionName("add-todo");
         addTodo({
@@ -88,7 +96,9 @@ export function TodosView() {
         {(list) => (
           <TodosViewHeader
             list={list()}
-            completedTodos={chosenListTodos().complete.length}
+            completedTodos={
+              listsCompleteIncompleteTodos()[chosenList().name].complete.length
+            }
             onHideShowClick={toggle}
             showComplete={showComplete()}
           />

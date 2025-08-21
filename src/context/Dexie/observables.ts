@@ -4,17 +4,20 @@ import {
   getCompleteIncompleteTodos,
   getTodosCollectionByListName,
 } from "./helpers";
-import type { ListName } from "@/types";
+import type { ListName, Todo } from "@/types";
 import { createList } from "@/helpers";
 import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
-export type ListTodoCount = Record<ListName, number>;
+export type ListCompleteIncompleteTodos = Record<
+  ListName,
+  { complete: Todo[]; incomplete: Todo[] }
+>;
 
-export const INIT_LIST_TODO_COUNT: ListTodoCount = {
-  completed: 0,
-  reminders: 0,
-  today: 0,
-  todomino: 0,
+export const INIT_LIST_COMPLETE_INCOMPLETE: ListCompleteIncompleteTodos = {
+  completed: { complete: [], incomplete: [] },
+  reminders: { complete: [], incomplete: [] },
+  today: { complete: [], incomplete: [] },
+  todomino: { complete: [], incomplete: [] },
 };
 
 export const listsObservable = liveQuery(() =>
@@ -32,17 +35,23 @@ export const chosenListTodosObservable = liveQuery(() =>
   }),
 );
 
-export const listTodoCountObservable = liveQuery(() =>
+export const listCompleteIncompleteTodosObservable = liveQuery(() =>
   db.transaction("r", db.lists, db.todos, async () => {
-    const listsTodoCount = { ...INIT_LIST_TODO_COUNT };
+    const listsTodoCount = { ...INIT_LIST_COMPLETE_INCOMPLETE };
+
     const lists = await db.lists.toArray();
+
     lists.forEach(async (list) => {
-      let todosCollection = getTodosCollectionByListName(list.name);
-      if (list.name !== "completed") {
-        todosCollection = todosCollection.and((todo) => !todo.completedAt);
-      }
-      listsTodoCount[list.name] = await todosCollection.count();
+      listsTodoCount[list.name] = {
+        complete: await getTodosCollectionByListName(list.name)
+          .and((todo) => !!todo.completedAt)
+          .toArray(),
+        incomplete: await getTodosCollectionByListName(list.name)
+          .and((todo) => !todo.completedAt)
+          .toArray(),
+      };
     });
+
     return listsTodoCount;
   }),
 );

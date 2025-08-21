@@ -144,22 +144,6 @@ export const TodoComp: Component<TodoProps> = (props) => {
           </menu>
         </PopUpMenu>
       </div>
-      <Show when={!!local.todo.dependent || !!local.todo.dependsOn}>
-        <div class="flex w-full flex-col bottom-1 left-1 text-gray-300">
-          <Show when={local.todo.dependsOn}>
-            <span>
-              Depends On:{truncateText(local.todo.dependsOn || "", 8)}
-            </span>
-          </Show>
-          <Show when={local.todo.dependent}>
-            <div class="flex w-full justify-between border border-orange-300">
-              <span>
-                Dependent:{truncateText(local.todo.dependent || "", 8)}
-              </span>
-            </div>
-          </Show>
-        </div>
-      </Show>
     </div>
   );
 };
