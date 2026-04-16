@@ -2,6 +2,7 @@ import { getTodosWhereKey, sortTodosByKey } from "@/db";
 import { type ListName, type Todo } from "@/types";
 import type { Collection, InsertType } from "dexie";
 
+// use this for the todo list hydration in dexie
 export function getTodosCollectionByListName(listName: ListName) {
   if (listName === "completed") {
     return getTodosWhereKey("completedAt").above(0);
