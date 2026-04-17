@@ -27,7 +27,7 @@ export function ListSelector(props: ListSelectorProps) {
   return (
     <button
       class={twMerge(
-        "group relative flex flex-col gap-1 items-start min-w-[150px] p-2 rounded-md",
+        "group relative flex flex-col gap-1 items-start min-w-[150px] p-2 rounded-md cursor-pointer",
         localProps.selected && "text-white",
         localProps.class,
       )}
@@ -69,7 +69,9 @@ export function ListSelector(props: ListSelectorProps) {
           />
         </div>
 
-        <b>{localProps.todoCount}</b>
+        <Show when={localProps.list.name !== "completed"}>
+          <b>{localProps.todoCount}</b>
+        </Show>
       </div>
       <b class="text-md font-semibold text-start">{localProps.list.name}</b>
     </button>
