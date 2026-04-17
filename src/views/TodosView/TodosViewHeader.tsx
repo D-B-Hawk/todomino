@@ -32,25 +32,17 @@ export function TodosViewHeader(props: TodosViewHeaderProps) {
       >
         {local.list.name}
       </h1>
-      <Show
-        when={
-          !isReadOnlyListName(local.list.name) ||
-          local.list.name === "completed"
-        }
-      >
+      <Show when={!isReadOnlyListName(local.list.name) && local.completedTodos}>
         <div class="flex justify-between">
           <span>{local.completedTodos} Completed</span>
-          <Show
-            when={!isReadOnlyListName(local.list.name) && local.completedTodos}
+
+          <button
+            class="cursor-pointer"
+            onClick={local.onHideShowClick}
+            style={{ color: PICKER_COLORS[local.list.color] }}
           >
-            <button
-              class="cursor-pointer"
-              onClick={local.onHideShowClick}
-              style={{ color: PICKER_COLORS[local.list.color] }}
-            >
-              {local.showComplete ? "Hide" : "Show"}
-            </button>
-          </Show>
+            {local.showComplete ? "Hide" : "Show"}
+          </button>
         </div>
       </Show>
     </div>
