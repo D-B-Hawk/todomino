@@ -20,10 +20,9 @@ import "./todosView.css";
 import { CurrentTodos } from "./CurrentTodos";
 
 export function TodosView() {
-  const [{ listsCompleteIncompleteTodos, chosenList }, { addTodo }] =
-    useDexieCtx();
+  const [{ chosenList }, { addTodo }] = useDexieCtx();
 
-  const [showComplete, { toggle }, setShowComplete] = useToggle();
+  const [showCompletedTodos, { toggle }, setShowCompletedTodos] = useToggle();
 
   const [transitonName, setTranstionName] = createSignal("slide-fade");
 
@@ -34,32 +33,34 @@ export function TodosView() {
   // option on before
   createEffect(() => {
     chosenList();
-    setShowComplete(false);
+    setShowCompletedTodos(false);
   });
 
   function handleCreateTodo() {
     const freshTodo = newTodo();
-    if (freshTodo) {
-      const defaultTodo = createTodo({
-        list: getListname(),
-        dueDate: getTime(),
-      });
-      if (
-        !isEqualExcludingKeys(freshTodo, defaultTodo, [
-          "id",
-          "createdAt",
-          "updatedAt",
-        ])
-      ) {
-        setTranstionName("add-todo");
-        addTodo({
-          ...freshTodo,
-          description: freshTodo.description || "New reminder", // give default
-        })
-          .catch((error) => console.error(error))
-          .finally(() => setTranstionName("slide-fade"));
-      }
+    if (!freshTodo) return;
+
+    const defaultTodo = createTodo({
+      list: getListname(),
+      dueDate: getTime(),
+    });
+
+    if (
+      !isEqualExcludingKeys(freshTodo, defaultTodo, [
+        "id",
+        "createdAt",
+        "updatedAt",
+      ])
+    ) {
+      setTranstionName("add-todo");
+      addTodo({
+        ...freshTodo,
+        description: freshTodo.description || "New reminder", // give default
+      })
+        .catch((error) => console.error(error))
+        .finally(() => setTranstionName("slide-fade"));
     }
+
     setNewTodo(undefined);
   }
 
@@ -70,18 +71,18 @@ export function TodosView() {
     setNewTodo(createTodo({ list: getListname(), dueDate: getTime() }));
   }
 
-  const showAddList = () => chosenList().name !== "completed";
+  const showAddList = () => chosenList()?.name !== "completed";
 
   function getListname(): ListName {
-    const chosenListName = chosenList().name;
-    if (isReadOnlyListName(chosenListName)) {
+    const chosenListName = chosenList()?.name;
+    if (!chosenListName || isReadOnlyListName(chosenListName)) {
       return "reminders";
     }
     return chosenListName;
   }
 
   function getTime() {
-    const chosenListName = chosenList().name;
+    const chosenListName = chosenList()?.name;
     if (chosenListName === "today") {
       const [todaysDate] = getCurrentTime();
       todaysDate.setSeconds(0, 0); // standardize seconds
@@ -93,19 +94,13 @@ export function TodosView() {
   return (
     <div class="flex flex-col w-full">
       <Show when={chosenList()}>
-        {(list) => (
-          <TodosViewHeader
-            list={list()}
-            completedTodos={
-              listsCompleteIncompleteTodos()[chosenList().name].complete.length
-            }
-            onHideShowClick={toggle}
-            showComplete={showComplete()}
-          />
-        )}
+        <TodosViewHeader
+          onHideShowClick={toggle}
+          showCompletedTodos={showCompletedTodos()}
+        />
       </Show>
       <ScrollableContainer class="relative p-4 gap-2">
-        <CurrentTodos showComplete={showComplete()} />
+        <CurrentTodos showCompletedTodos={showCompletedTodos()} />
         <Transition name={transitonName()}>
           <Show when={newTodo()}>
             {(todo) => (
