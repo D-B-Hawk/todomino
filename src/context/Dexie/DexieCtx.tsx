@@ -7,21 +7,23 @@ import {
 import { useObservable } from "@/hooks";
 import {
   chosenListObservable,
-  INIT_LIST_COMPLETE_INCOMPLETE,
+  chosenListCompleteTodosObservable,
+  chosenListIncompleteTodosObservable,
   listsObservable,
-  type ListCompleteIncompleteTodos,
-  listCompleteIncompleteTodosObservable,
+  listsIncompleteTodosCountObservable,
+  type ListsIncompleteTodoMap,
 } from "./observables";
 import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
 import { db, getTodosWhereKey } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
-import { INITIAL_LISTS_MAP } from "@/constants/lists";
 
 type DexCtx = [
   {
     lists: Accessor<List[]>;
-    listsCompleteIncompleteTodos: Accessor<ListCompleteIncompleteTodos>;
-    chosenList: Accessor<List>;
+    chosenList: Accessor<List | undefined>;
+    listsIncompleteTodosCount: Accessor<ListsIncompleteTodoMap>;
+    chosenListCompleteTodos: Accessor<Todo[]>;
+    chosenListIncompleteTodos: Accessor<Todo[]>;
   },
   {
     addTodo: (todo: Todo) => Promise<string>;
@@ -42,16 +44,20 @@ export const DexieCtx = createContext<DexCtx>();
 export function DexieProvider(props: ParentProps) {
   const lists = useObservable(listsObservable, []);
 
-  const chosenList = useObservable(
-    chosenListObservable,
-    INITIAL_LISTS_MAP["reminders"],
+  const chosenList = useObservable(chosenListObservable, undefined);
+
+  const chosenListCompleteTodos = useObservable(
+    chosenListCompleteTodosObservable,
+    [],
+  );
+  const chosenListIncompleteTodos = useObservable(
+    chosenListIncompleteTodosObservable,
+    [],
   );
 
-  const listsCompleteIncompleteTodos = useObservable(
-    listCompleteIncompleteTodosObservable,
-    {
-      ...INIT_LIST_COMPLETE_INCOMPLETE,
-    },
+  const listsIncompleteTodosCount = useObservable(
+    listsIncompleteTodosCountObservable,
+    {} as ListsIncompleteTodoMap,
   );
 
   async function addList(args: CreateListArgs) {
@@ -117,8 +123,10 @@ export function DexieProvider(props: ParentProps) {
 
   const dexieState = {
     lists,
-    listsCompleteIncompleteTodos,
+    listsIncompleteTodosCount,
     chosenList,
+    chosenListCompleteTodos,
+    chosenListIncompleteTodos,
   };
 
   const dexieMethods = {

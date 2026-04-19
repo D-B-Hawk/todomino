@@ -1,63 +1,47 @@
 import { liveQuery } from "dexie";
 import { db } from "@/db";
-import {
-  getCompleteIncompleteTodos,
-  getTodosCollectionByListName,
-} from "./helpers";
-import type { ListName, Todo } from "@/types";
-import { createList } from "@/helpers";
-import { INITIAL_LISTS_MAP } from "@/constants/lists";
+import { type ListName } from "@/constants/lists";
+import { getTodosCollectionByListName } from "./helpers";
 
-export type ListCompleteIncompleteTodos = Record<
-  ListName,
-  { complete: Todo[]; incomplete: Todo[] }
->;
+export type ListsIncompleteTodoMap = Record<ListName, number>;
 
-export const INIT_LIST_COMPLETE_INCOMPLETE: ListCompleteIncompleteTodos = {
-  completed: { complete: [], incomplete: [] },
-  reminders: { complete: [], incomplete: [] },
-  today: { complete: [], incomplete: [] },
-  todomino: { complete: [], incomplete: [] },
-};
+export const listsObservable = liveQuery(() => db.lists.toArray());
 
-export const listsObservable = liveQuery(() =>
-  db.transaction("r", db.lists, () => db.lists.toArray()),
+export const chosenListObservable = liveQuery(() =>
+  db.chosenList.toCollection().first(),
 );
 
-export const chosenListTodosObservable = liveQuery(() =>
-  db.transaction("r", db.chosenList, db.todos, async () => {
-    // defaulting the chosen list to reminders
-    const { name: chosenListName } =
-      (await db.chosenList.toCollection().first()) || createList(); // this will default to reminders
-
-    const todosCollection = getTodosCollectionByListName(chosenListName);
-    return getCompleteIncompleteTodos(todosCollection);
-  }),
-);
-
-export const listCompleteIncompleteTodosObservable = liveQuery(() =>
-  db.transaction("r", db.lists, db.todos, async () => {
-    const listsTodoCount = { ...INIT_LIST_COMPLETE_INCOMPLETE };
-
-    const lists = await db.lists.toArray();
-
-    lists.forEach(async (list) => {
-      listsTodoCount[list.name] = {
-        complete: await getTodosCollectionByListName(list.name)
-          .and((todo) => !!todo.completedAt)
-          .toArray(),
-        incomplete: await getTodosCollectionByListName(list.name)
-          .and((todo) => !todo.completedAt)
-          .toArray(),
-      };
-    });
-
-    return listsTodoCount;
-  }),
-);
-
-export const chosenListObservable = liveQuery(async () => {
+export const chosenListIncompleteTodosObservable = liveQuery(async () => {
   const chosenList = await db.chosenList.toCollection().first();
-  const defaultList = INITIAL_LISTS_MAP["reminders"];
-  return chosenList ?? defaultList;
+  if (!chosenList) {
+    return [];
+  }
+  return getTodosCollectionByListName(chosenList.name)
+    .and((todo) => todo.completedAt === undefined)
+    .toArray();
+});
+
+export const chosenListCompleteTodosObservable = liveQuery(async () => {
+  const chosenList = await db.chosenList.toCollection().first();
+  if (!chosenList) {
+    return [];
+  }
+  return getTodosCollectionByListName(chosenList.name)
+    .and((todo) => todo.completedAt !== undefined)
+    .toArray();
+});
+
+export const listsIncompleteTodosCountObservable = liveQuery(async () => {
+  const lists = await db.lists.toArray();
+  const listsIncompleteTodoMap = {} as ListsIncompleteTodoMap;
+
+  for (const list of lists) {
+    listsIncompleteTodoMap[list.name] = await getTodosCollectionByListName(
+      list.name,
+    )
+      .and((todo) => todo.completedAt === undefined)
+      .count();
+  }
+
+  return listsIncompleteTodoMap;
 });
