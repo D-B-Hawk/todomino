@@ -9,20 +9,14 @@ type ListViewProps = {
 };
 
 export function ListView(props: ListViewProps) {
-  const [{ lists, listsCompleteIncompleteTodos, chosenList }, { chooseList }] =
+  const [{ lists, listsIncompleteTodosCount, chosenList }, { chooseList }] =
     useDexieCtx();
 
   function getIncompleteTodosCount(listName: ListName) {
-    const completeIncompleteTodos = listsCompleteIncompleteTodos()[listName];
-    // there is a possibility that the initial list will not have a
-    // list made by the user on initial mount
-    if (completeIncompleteTodos) {
-      if (listName === "completed") {
-        return completeIncompleteTodos.complete.length;
-      }
-      return completeIncompleteTodos.incomplete.length;
+    if (!listsIncompleteTodosCount()) {
+      return 0;
     }
-    return 0;
+    return listsIncompleteTodosCount()[listName] ?? 0;
   }
 
   return (
