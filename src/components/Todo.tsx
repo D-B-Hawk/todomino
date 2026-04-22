@@ -26,6 +26,7 @@ export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   onUpdateDueDate: (value: number) => void;
   onUpdateListName: (listName: ListName) => void;
   popUpMenuDisabled?: boolean;
+  showListPicker?: boolean;
 }
 
 export const TodoComp: Component<TodoProps> = (props) => {
@@ -39,13 +40,14 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "onUpdateDueDate",
     "onUpdateListName",
     "popUpMenuDisabled",
+    "showListPicker",
   ]);
 
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [dueDate, setDueDate] = createSignal(local.todo.dueDate);
   const [listName, setListName] = createSignal(local.todo.list);
 
-  const [showDatePicker, { toggle }, setShowDatePicker] = useToggle();
+  const [showPickerMenus, { toggle }, setShowPickerMenus] = useToggle();
 
   function handleOutside(event: MouseEvent) {
     if (
@@ -60,7 +62,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
 
   createEffect(
     on(
-      showDatePicker,
+      showPickerMenus,
       (picker) => {
         if (picker) {
           document.addEventListener("click", handleOutside);
@@ -106,11 +108,11 @@ export const TodoComp: Component<TodoProps> = (props) => {
             type="text"
             value={local.todo.description}
             placeholder="New Reminder"
-            onFocus={() => setShowDatePicker(true)}
+            onFocus={() => setShowPickerMenus(true)}
             onInput={(e) => local.onUpdateDescription(e.target.value)}
           />
-          <Show when={showDatePicker()}>
-            <div class="flex gap-2">
+          <Show when={showPickerMenus()}>
+            <div class="flex gap-2 border border-blue-400">
               <DatePicker
                 currentDate={dueDate()}
                 onDateChange={(dueDate) => {
@@ -118,13 +120,15 @@ export const TodoComp: Component<TodoProps> = (props) => {
                   local.onUpdateDueDate(dueDate);
                 }}
               />
-              <ListPicker
-                todoListName={listName()}
-                onListOptionClick={(listName) => {
-                  setListName(listName);
-                  local.onUpdateListName(listName);
-                }}
-              />
+              <Show when={local.showListPicker}>
+                <ListPicker
+                  todoListName={listName()}
+                  onListOptionClick={(listName) => {
+                    setListName(listName);
+                    local.onUpdateListName(listName);
+                  }}
+                />
+              </Show>
             </div>
           </Show>
         </div>

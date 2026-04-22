@@ -18,9 +18,10 @@ import {
 import { TodosViewHeader } from "./TodosViewHeader";
 import "./todosView.css";
 import { CurrentTodos } from "./CurrentTodos";
+import { INITIAL_LIST_NAMES } from "@/constants/lists";
 
 export function TodosView() {
-  const [{ chosenList }, { addTodo }] = useDexieCtx();
+  const [{ lists, chosenList }, { addTodo }] = useDexieCtx();
 
   const [showCompletedTodos, { toggle }, setShowCompletedTodos] = useToggle();
 
@@ -73,6 +74,8 @@ export function TodosView() {
 
   const showAddList = () => chosenList()?.name !== "completed";
 
+  const showListPicker = () => lists().length > INITIAL_LIST_NAMES.length;
+
   function getListname(): ListName {
     const chosenListName = chosenList()?.name;
     if (!chosenListName || isReadOnlyListName(chosenListName)) {
@@ -107,6 +110,7 @@ export function TodosView() {
               <OnClickOutsideContainer onClickOutside={handleCreateTodo}>
                 <TodoComp
                   popUpMenuDisabled
+                  showListPicker={showListPicker()}
                   onClickOutside={handleCreateTodo}
                   todo={todo()}
                   onCheck={(checked) =>
