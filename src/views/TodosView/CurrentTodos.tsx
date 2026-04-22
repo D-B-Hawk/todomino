@@ -4,6 +4,7 @@ import { useAsyncDebounce } from "@/hooks";
 import { TodoComp } from "@/components";
 import type { Todo } from "@/types";
 import { deepEqual } from "@/helpers";
+import { INITIAL_LIST_NAMES } from "@/constants/lists";
 
 type CurrentTodosProps = {
   showCompletedTodos: boolean;
@@ -13,7 +14,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
   const [editedTodo, setEditedTodo] = createSignal<Todo>();
 
   const [
-    { chosenList, chosenListCompleteTodos, chosenListIncompleteTodos },
+    { lists, chosenList, chosenListCompleteTodos, chosenListIncompleteTodos },
     { handleTodoCheck, deleteTodo, updateTodo },
   ] = useDexieCtx();
 
@@ -54,6 +55,8 @@ export function CurrentTodos(props: CurrentTodosProps) {
     return chosenListIncompleteTodos();
   };
 
+  const showListPicker = () => lists().length > INITIAL_LIST_NAMES.length;
+
   const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
 
   return (
@@ -69,6 +72,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
           onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
           onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
           onClickOutside={() => handleClickOutside(todo)}
+          showListPicker={showListPicker()}
         />
       )}
     </For>
