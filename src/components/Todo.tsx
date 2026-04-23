@@ -16,6 +16,8 @@ import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
 import { DatePicker } from "./DatePicker";
 import { ListPicker } from "./ListPicker";
+import { IconButton } from "./IconButton";
+import { createStore } from "solid-js/store";
 
 export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   todo: Todo;
@@ -25,6 +27,7 @@ export interface TodoProps extends JSX.HTMLAttributes<HTMLDivElement> {
   onUpdateDescription: (value: string) => void;
   onUpdateDueDate: (value: number) => void;
   onUpdateListName: (listName: ListName) => void;
+  onUpdateTodomino: () => void;
   popUpMenuDisabled?: boolean;
   showListPicker?: boolean;
 }
@@ -39,13 +42,13 @@ export const TodoComp: Component<TodoProps> = (props) => {
     "onUpdateDescription",
     "onUpdateDueDate",
     "onUpdateListName",
+    "onUpdateTodomino",
     "popUpMenuDisabled",
     "showListPicker",
   ]);
 
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
-  const [dueDate, setDueDate] = createSignal(local.todo.dueDate);
-  const [listName, setListName] = createSignal(local.todo.list);
+  const [localTodo, setLocalTodo] = createStore({ ...local.todo });
 
   const [showPickerMenus, { toggle }, setShowPickerMenus] = useToggle();
 
@@ -114,21 +117,43 @@ export const TodoComp: Component<TodoProps> = (props) => {
           <Show when={showPickerMenus()}>
             <div class="flex gap-2 border border-blue-400">
               <DatePicker
-                currentDate={dueDate()}
+                currentDate={localTodo.dueDate}
                 onDateChange={(dueDate) => {
-                  setDueDate(dueDate);
+                  setLocalTodo("dueDate", dueDate);
                   local.onUpdateDueDate(dueDate);
                 }}
               />
               <Show when={local.showListPicker}>
                 <ListPicker
-                  todoListName={listName()}
+                  todoListName={localTodo.list}
                   onListOptionClick={(listName) => {
-                    setListName(listName);
+                    setLocalTodo("list", listName);
                     local.onUpdateListName(listName);
                   }}
                 />
               </Show>
+              <IconButton
+                onClick={() => {
+                  setLocalTodo("dominoIndex", (curIndex) => {
+                    if (curIndex !== undefined) {
+                      return undefined;
+                    }
+                    if (local.todo.dominoIndex) {
+                      return local.todo.dominoIndex;
+                    }
+                    return 0;
+                  });
+                  local.onUpdateTodomino();
+                }}
+                class="gap-1 p-1 rounded-md items-center bg-black/5 hover:bg-black/15"
+                classList={{
+                  "bg-purple-400/80 hover:bg-purple-400":
+                    localTodo.dominoIndex !== undefined,
+                }}
+                iconProps={{ icon: "BOX", class: "w-4" }}
+              >
+                Todomino
+              </IconButton>
             </div>
           </Show>
         </div>

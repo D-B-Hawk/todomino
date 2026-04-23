@@ -21,7 +21,8 @@ import { CurrentTodos } from "./CurrentTodos";
 import { INITIAL_LIST_NAMES } from "@/constants/lists";
 
 export function TodosView() {
-  const [{ lists, chosenList }, { addTodo }] = useDexieCtx();
+  const [{ lists, chosenList, listsIncompleteTodosCount }, { addTodo }] =
+    useDexieCtx();
 
   const [showCompletedTodos, { toggle }, setShowCompletedTodos] = useToggle();
 
@@ -94,6 +95,20 @@ export function TodosView() {
     return undefined;
   }
 
+  function handleUpdateTodomino() {
+    const freshTodo = newTodo();
+    if (freshTodo) {
+      let nextDominoIndex: Todo["dominoIndex"] =
+        listsIncompleteTodosCount()["todomino"];
+
+      if (typeof freshTodo.dominoIndex === "number") {
+        nextDominoIndex = undefined;
+      }
+
+      setNewTodo({ ...freshTodo, dominoIndex: nextDominoIndex });
+    }
+  }
+
   return (
     <div class="flex flex-col w-full">
       <Show when={chosenList()}>
@@ -121,14 +136,13 @@ export function TodosView() {
                   }
                   onDelete={() => setNewTodo()}
                   onUpdateDescription={(description) =>
-                    setNewTodo(() => ({ ...todo(), description }))
+                    setNewTodo({ ...todo(), description })
                   }
                   onUpdateDueDate={(dueDate) =>
-                    setNewTodo(() => ({ ...todo(), dueDate }))
+                    setNewTodo({ ...todo(), dueDate })
                   }
-                  onUpdateListName={(list) =>
-                    setNewTodo(() => ({ ...todo(), list }))
-                  }
+                  onUpdateListName={(list) => setNewTodo({ ...todo(), list })}
+                  onUpdateTodomino={handleUpdateTodomino}
                 />
               </OnClickOutsideContainer>
             )}

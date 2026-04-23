@@ -103,7 +103,10 @@ export function DexieProvider(props: ParentProps) {
   }
 
   function updateTodo(todo: Todo) {
-    return db.todos.update(todo.id, todo);
+    return db.todos.update(todo, {
+      ...todo,
+      updatedAt: Date.now(),
+    });
   }
 
   async function handleTodoCheck(checked: boolean, todo: Todo) {
