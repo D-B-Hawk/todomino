@@ -4,6 +4,7 @@ import {
   type TodosDBTransaction,
 } from "@/db";
 import { type ListName, type Todo } from "@/types";
+import { hasTodominoIndex } from "@/helpers";
 
 // use this for the todo list hydration in dexie
 export function getTodosCollectionByListName(listName: ListName) {
@@ -32,10 +33,7 @@ export async function handleTodominoTodoIndexes(
   const sortedTodos = (
     await sortTodosByKey("dominoIndex", currentTodominoTodos)
   ).filter((todo) => {
-    if (
-      todo.dominoIndex !== undefined &&
-      currentTodo.dominoIndex !== undefined
-    ) {
+    if (hasTodominoIndex(todo) && hasTodominoIndex(currentTodo)) {
       return todo.dominoIndex > currentTodo.dominoIndex;
     }
   });

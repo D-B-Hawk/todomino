@@ -12,3 +12,4 @@ export { isSelectDateEvent } from "./isSelectDateEvent";
 export { getCurrentTime } from "./getCurrentTime";
 export { deepEqual } from "./deepEqual";
 export { isEqualExcludingKeys } from "./isEqualExcludingKeys";
+export { hasTodominoIndex } from "./hasTodominoIndex";

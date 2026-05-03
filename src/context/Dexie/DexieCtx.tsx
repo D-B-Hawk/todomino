@@ -13,7 +13,12 @@ import {
   listsIncompleteTodosCountObservable,
   type ListsIncompleteTodoMap,
 } from "./observables";
-import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
+import {
+  createList,
+  type CreateListArgs,
+  hasTodominoIndex,
+  isConstantListName,
+} from "@/helpers";
 import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
 import {
@@ -88,9 +93,7 @@ export function DexieProvider(props: ParentProps) {
       const listOfTodos = tx.todos.where("list").equals(listName);
 
       const todominosInList =
-        (await listOfTodos
-          .and((todo) => todo.dominoIndex !== undefined)
-          .count()) > 0;
+        (await listOfTodos.and((todo) => hasTodominoIndex(todo)).count()) > 0;
 
       await listOfTodos.delete();
 
@@ -134,7 +137,7 @@ export function DexieProvider(props: ParentProps) {
 
       return db.transaction("rw", db.todos, async (tx) => {
         if (
-          currentTodo.dominoIndex !== undefined &&
+          hasTodominoIndex(currentTodo) &&
           updatedTodo.dominoIndex === undefined
         ) {
           await handleTodominoTodoIndexes(tx, currentTodo);
@@ -159,7 +162,7 @@ export function DexieProvider(props: ParentProps) {
 
     return db.transaction("rw", db.todos, async (tx) => {
       // if the todo is completed we can remove it from the todomino list
-      if (completedAt && todo.dominoIndex !== undefined) {
+      if (completedAt && hasTodominoIndex(todo)) {
         await handleTodominoTodoIndexes(tx, todo);
       }
 

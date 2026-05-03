@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import { type ListName, type Todo } from "@/types";
-import { truncateText } from "@/helpers";
+import { hasTodominoIndex, truncateText } from "@/helpers";
 import { Checkbox } from "./Checkbox";
 import { PopUpMenu } from "./PopUpMenu";
 import { useToggle } from "@/hooks";
@@ -148,7 +148,7 @@ export const TodoComp: Component<TodoProps> = (props) => {
                 class="gap-1 p-1 rounded-md items-center bg-black/5 hover:bg-black/15"
                 classList={{
                   "bg-purple-400/80 hover:bg-purple-400":
-                    localTodo.dominoIndex !== undefined,
+                    hasTodominoIndex(localTodo),
                 }}
                 iconProps={{ icon: "BOX", class: "w-4" }}
               >
