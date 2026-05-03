@@ -6,6 +6,7 @@ import { useToggle } from "@/hooks";
 import {
   createTodo,
   getCurrentTime,
+  hasTodominoIndex,
   isEqualExcludingKeys,
   isReadOnlyListName,
 } from "@/helpers";
@@ -101,7 +102,7 @@ export function TodosView() {
       let nextDominoIndex: Todo["dominoIndex"] =
         listsIncompleteTodosCount()["todomino"];
 
-      if (typeof freshTodo.dominoIndex === "number") {
+      if (hasTodominoIndex(freshTodo)) {
         nextDominoIndex = undefined;
       }
 

@@ -4,7 +4,7 @@ import { useAsyncDebounce } from "@/hooks";
 import { TodoComp } from "@/components";
 import type { Todo } from "@/types";
 import { INITIAL_LIST_NAMES } from "@/constants/lists";
-import { isEqualExcludingKeys } from "@/helpers";
+import { hasTodominoIndex, isEqualExcludingKeys } from "@/helpers";
 
 type CurrentTodosProps = {
   showCompletedTodos: boolean;
@@ -72,8 +72,8 @@ export function CurrentTodos(props: CurrentTodosProps) {
     let nextDominoIndex: Todo["dominoIndex"] =
       listsIncompleteTodosCount()["todomino"];
 
-    // if todo previously had an index, remove it
-    if (typeof todoToEdit.dominoIndex === "number") {
+    // if todo previously had a dominoIndex, remove it
+    if (hasTodominoIndex(todoToEdit)) {
       nextDominoIndex = undefined;
       // if there was a previous index, place it back
     } else if (previousDominoIndex) {
