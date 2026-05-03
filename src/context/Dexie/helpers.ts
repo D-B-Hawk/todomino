@@ -1,6 +1,9 @@
-import { getTodosWhereKey, sortTodosByKey } from "@/db";
+import {
+  getTodosWhereKey,
+  sortTodosByKey,
+  type TodosDBTransaction,
+} from "@/db";
 import { type ListName, type Todo } from "@/types";
-import type { Collection, InsertType } from "dexie";
 
 // use this for the todo list hydration in dexie
 export function getTodosCollectionByListName(listName: ListName) {
@@ -17,21 +20,36 @@ export function getTodosCollectionByListName(listName: ListName) {
   return getTodosWhereKey("list").equals(listName);
 }
 
-export async function getCompleteIncompleteTodos(
-  todos: Collection<Todo, string, InsertType<Todo, "id">>,
+export async function handleTodominoTodoIndexes(
+  tx: TodosDBTransaction,
+  currentTodo: Todo,
 ) {
-  const complete: Todo[] = [];
-  const incomplete: Todo[] = [];
+  // if the current todo had a todomino index and the updated one does not. shift all the
+  // todos in the todomino that have a higher index down one.
 
-  const todoArray = await sortTodosByKey("createdAt", todos);
+  const currentTodominoTodos = getTodosCollectionByListName("todomino");
 
-  todoArray.forEach((todo) => {
-    if (todo.completedAt) {
-      complete.push(todo);
-      return;
+  const sortedTodos = (
+    await sortTodosByKey("dominoIndex", currentTodominoTodos)
+  ).filter((todo) => {
+    if (
+      todo.dominoIndex !== undefined &&
+      currentTodo.dominoIndex !== undefined
+    ) {
+      return todo.dominoIndex > currentTodo.dominoIndex;
     }
-    incomplete.push(todo);
   });
 
-  return { complete, incomplete };
+  sortedTodos.forEach(async (todo) => {
+    let updatedIndex = todo.dominoIndex;
+    if (updatedIndex !== undefined) {
+      updatedIndex -= 1;
+    }
+
+    await tx.todos.update(todo, {
+      ...todo,
+      updatedAt: Date.now(),
+      dominoIndex: updatedIndex,
+    });
+  });
 }
