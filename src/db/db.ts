@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from "dexie";
+import Dexie, { type EntityTable, type Transaction } from "dexie";
 import type { List, Todo } from "@/types";
 import { createList } from "@/helpers";
 import { typedTable } from "./helpers";
@@ -9,6 +9,8 @@ export type TodosDBTable = {
   lists: EntityTable<List, "name">;
   chosenList: EntityTable<List, "name">;
 };
+
+export type TodosDBTransaction = Transaction & TodosDBTable;
 
 export const db = new Dexie("TodosDB") as Dexie & TodosDBTable;
 

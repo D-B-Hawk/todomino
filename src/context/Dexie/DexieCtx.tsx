@@ -13,9 +13,18 @@ import {
   listsIncompleteTodosCountObservable,
   type ListsIncompleteTodoMap,
 } from "./observables";
-import { createList, type CreateListArgs, isConstantListName } from "@/helpers";
-import { db, getTodosWhereKey } from "@/db";
+import {
+  createList,
+  type CreateListArgs,
+  hasTodominoIndex,
+  isConstantListName,
+} from "@/helpers";
+import { db } from "@/db";
 import { type List, type ListName, type Todo } from "@/types";
+import {
+  getTodosCollectionByListName,
+  handleTodominoTodoIndexes,
+} from "./helpers";
 
 type DexCtx = [
   {
@@ -28,7 +37,7 @@ type DexCtx = [
   {
     addTodo: (todo: Todo) => Promise<string>;
     deleteTodo: (todo: Todo) => Promise<void>;
-    updateTodo: (todo: Todo) => Promise<number>;
+    updateTodo: (todo: Todo) => Promise<void>;
     handleTodoCheck: (
       checked: boolean,
       todo: Todo,
@@ -78,9 +87,27 @@ export function DexieProvider(props: ParentProps) {
       throw new Error("unable to delete restricted list name");
     }
 
-    return db.transaction("rw", db.lists, db.todos, (tx) => {
+    return db.transaction("rw", db.lists, db.todos, async (tx) => {
       tx.lists.delete(listName);
-      getTodosWhereKey("list").equals(listName).delete();
+
+      const listOfTodos = tx.todos.where("list").equals(listName);
+
+      const todominosInList =
+        (await listOfTodos.and((todo) => hasTodominoIndex(todo)).count()) > 0;
+
+      await listOfTodos.delete();
+
+      if (todominosInList) {
+        const todominoTodos =
+          await getTodosCollectionByListName("todomino").toArray();
+
+        todominoTodos.forEach(async (todo, idx) => {
+          await tx.todos.update(todo, {
+            dominoIndex: idx,
+            updatedAt: Date.now(),
+          });
+        });
+      }
     });
   }
 
@@ -102,8 +129,26 @@ export function DexieProvider(props: ParentProps) {
     return db.todos.delete(todo.id);
   }
 
-  function updateTodo(todo: Todo) {
-    return db.todos.update(todo.id, todo);
+  async function updateTodo(updatedTodo: Todo) {
+    const currentTodo = await db.todos.get(updatedTodo.id);
+    if (currentTodo) {
+      // if the current todo had a todomino index and the updated one does not. shift all the
+      // todos in the todomino list that have a higher index down one.
+
+      return db.transaction("rw", db.todos, async (tx) => {
+        if (
+          hasTodominoIndex(currentTodo) &&
+          updatedTodo.dominoIndex === undefined
+        ) {
+          await handleTodominoTodoIndexes(tx, currentTodo);
+        }
+
+        tx.todos.update(updatedTodo, {
+          ...updatedTodo,
+          updatedAt: Date.now(),
+        });
+      });
+    }
   }
 
   async function handleTodoCheck(checked: boolean, todo: Todo) {
@@ -115,9 +160,17 @@ export function DexieProvider(props: ParentProps) {
     const now = Date.now();
     const completedAt = checked ? now : undefined;
 
-    return db.todos.update(todo, {
-      updatedAt: now,
-      completedAt,
+    return db.transaction("rw", db.todos, async (tx) => {
+      // if the todo is completed we can remove it from the todomino list
+      if (completedAt && hasTodominoIndex(todo)) {
+        await handleTodominoTodoIndexes(tx, todo);
+      }
+
+      return db.todos.update(todo, {
+        updatedAt: now,
+        completedAt,
+        dominoIndex: undefined,
+      });
     });
   }
 
