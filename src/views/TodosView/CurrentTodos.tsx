@@ -1,4 +1,4 @@
-import { createSignal, For } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { useDexieCtx } from "@/context";
 import { useAsyncDebounce } from "@/hooks";
 import { TodoComp } from "@/components";
@@ -47,18 +47,6 @@ export function CurrentTodos(props: CurrentTodosProps) {
     setEditedTodo(undefined);
   }
 
-  const displayedTodos = () => {
-    if (chosenList()?.name === "completed") {
-      return chosenListCompleteTodos();
-    }
-
-    if (props.showCompletedTodos) {
-      return [...chosenListIncompleteTodos(), ...chosenListCompleteTodos()];
-    }
-
-    return chosenListIncompleteTodos();
-  };
-
   const showListPicker = () => lists().length > INITIAL_LIST_NAMES.length;
 
   const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
@@ -84,22 +72,47 @@ export function CurrentTodos(props: CurrentTodosProps) {
   };
 
   return (
-    <For each={displayedTodos()}>
-      {(todo) => (
-        <TodoComp
-          todo={todo}
-          onCheck={(checked) => debouncedCheck(checked, todo)}
-          onDelete={() => deleteTodo(todo)}
-          onUpdateDescription={(description) =>
-            setEditedTodo({ ...todo, description })
-          }
-          onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
-          onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
-          onClickOutside={() => handleClickOutside(todo)}
-          showListPicker={showListPicker()}
-          onUpdateTodomino={() => handleUpdateTodomino(todo)}
-        />
-      )}
-    </For>
+    <>
+      <Show when={chosenList()?.name !== "completed"}>
+        <For each={chosenListIncompleteTodos()}>
+          {(todo) => (
+            <TodoComp
+              todo={todo}
+              onCheck={(checked) => debouncedCheck(checked, todo)}
+              onDelete={() => deleteTodo(todo)}
+              onUpdateDescription={(description) =>
+                setEditedTodo({ ...todo, description })
+              }
+              onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
+              onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
+              onClickOutside={() => handleClickOutside(todo)}
+              showListPicker={showListPicker()}
+              onUpdateTodomino={() => handleUpdateTodomino(todo)}
+            />
+          )}
+        </For>
+      </Show>
+      <Show
+        when={props.showCompletedTodos || chosenList()?.name === "completed"}
+      >
+        <For each={chosenListCompleteTodos()}>
+          {(todo) => (
+            <TodoComp
+              todo={todo}
+              onCheck={(checked) => debouncedCheck(checked, todo)}
+              onDelete={() => deleteTodo(todo)}
+              onUpdateDescription={(description) =>
+                setEditedTodo({ ...todo, description })
+              }
+              onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
+              onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
+              onClickOutside={() => handleClickOutside(todo)}
+              showListPicker={showListPicker()}
+              onUpdateTodomino={() => handleUpdateTodomino(todo)}
+            />
+          )}
+        </For>
+      </Show>
+    </>
   );
 }
