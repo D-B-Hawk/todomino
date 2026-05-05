@@ -1,6 +1,6 @@
 import { createSignal, For, Show } from "solid-js";
 import { useDexieCtx } from "@/context";
-import { useAsyncDebounce } from "@/hooks";
+// import { useAsyncDebounce } from "@/hooks";
 import { TodoComp } from "@/components";
 import type { Todo } from "@/types";
 import { INITIAL_LIST_NAMES } from "@/constants/lists";
@@ -21,13 +21,29 @@ export function CurrentTodos(props: CurrentTodosProps) {
       chosenListIncompleteTodos,
       listsIncompleteTodosCount,
     },
-    { handleTodoCheck, deleteTodo, updateTodo },
+    { deleteTodo, updateTodo },
   ] = useDexieCtx();
 
+  const showIncompleteTodos = () => chosenList()?.name !== "completed";
+  const showCompletedTodos = () =>
+    props.showCompletedTodos || chosenList()?.name === "completed";
+
   async function handleCheck(checked: boolean, todo: Todo) {
-    return handleTodoCheck(checked, todo).catch((error) =>
-      console.error(error),
-    );
+    // if both lists are visible handle the change immediately
+    if (showCompletedTodos() && showIncompleteTodos()) {
+      const now = Date.now();
+      const updatedTodo: Todo = {
+        ...todo,
+        completedAt: checked ? now : undefined,
+        updatedAt: now,
+      };
+
+      await updateTodo(updatedTodo).catch((error) =>
+        console.error("error from updateTodo in handleCheck =>", error),
+      );
+    }
+    // otherwise place todos that are being checked off into a queue
+    // console.log("doing nothing since they should be placed in queue");
   }
 
   function handleClickOutside(currentTodo: Todo) {
@@ -38,10 +54,11 @@ export function CurrentTodos(props: CurrentTodosProps) {
       const updatedTodo: Todo = {
         ...edited,
         description: edited.description || "New reminder", // give default,
+        updatedAt: Date.now(),
       };
 
       updateTodo(updatedTodo).catch((error) => {
-        console.error(error);
+        console.error("Error from updateTodo in handleClickOutside", error);
       });
     }
     setEditedTodo(undefined);
@@ -49,7 +66,7 @@ export function CurrentTodos(props: CurrentTodosProps) {
 
   const showListPicker = () => lists().length > INITIAL_LIST_NAMES.length;
 
-  const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
+  // const debouncedCheck = useAsyncDebounce(handleCheck, 2000);
 
   const handleUpdateTodomino = (todo: Todo) => {
     const todoToEdit = editedTodo() ?? todo;
@@ -73,12 +90,12 @@ export function CurrentTodos(props: CurrentTodosProps) {
 
   return (
     <>
-      <Show when={chosenList()?.name !== "completed"}>
+      <Show when={showIncompleteTodos()}>
         <For each={chosenListIncompleteTodos()}>
           {(todo) => (
             <TodoComp
               todo={todo}
-              onCheck={(checked) => debouncedCheck(checked, todo)}
+              onCheck={(checked) => handleCheck(checked, todo)}
               onDelete={() => deleteTodo(todo)}
               onUpdateDescription={(description) =>
                 setEditedTodo({ ...todo, description })
@@ -92,14 +109,12 @@ export function CurrentTodos(props: CurrentTodosProps) {
           )}
         </For>
       </Show>
-      <Show
-        when={props.showCompletedTodos || chosenList()?.name === "completed"}
-      >
+      <Show when={showCompletedTodos()}>
         <For each={chosenListCompleteTodos()}>
           {(todo) => (
             <TodoComp
               todo={todo}
-              onCheck={(checked) => debouncedCheck(checked, todo)}
+              onCheck={(checked) => handleCheck(checked, todo)}
               onDelete={() => deleteTodo(todo)}
               onUpdateDescription={(description) =>
                 setEditedTodo({ ...todo, description })
