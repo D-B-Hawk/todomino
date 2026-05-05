@@ -38,10 +38,6 @@ type DexCtx = [
     addTodo: (todo: Todo) => Promise<string>;
     deleteTodo: (todo: Todo) => Promise<void>;
     updateTodo: (todo: Todo) => Promise<void>;
-    handleTodoCheck: (
-      checked: boolean,
-      todo: Todo,
-    ) => Promise<number | undefined>;
     addList: (args: CreateListArgs) => Promise<void>;
     chooseList: (newList: List) => void;
     deleteList: (listName: ListName) => Promise<void>;
@@ -145,33 +141,11 @@ export function DexieProvider(props: ParentProps) {
 
         tx.todos.update(updatedTodo, {
           ...updatedTodo,
-          updatedAt: Date.now(),
         });
       });
     }
-  }
 
-  async function handleTodoCheck(checked: boolean, todo: Todo) {
-    // in the case of debouncing it is possible for nothing to change
-    // for that situation return
-    if (checked === !!todo.completedAt) {
-      return;
-    }
-    const now = Date.now();
-    const completedAt = checked ? now : undefined;
-
-    return db.transaction("rw", db.todos, async (tx) => {
-      // if the todo is completed we can remove it from the todomino list
-      if (completedAt && hasTodominoIndex(todo)) {
-        await handleTodominoTodoIndexes(tx, todo);
-      }
-
-      return db.todos.update(todo, {
-        updatedAt: now,
-        completedAt,
-        dominoIndex: undefined,
-      });
-    });
+    throw Error(`Todo with id: ${updatedTodo.id} not found`);
   }
 
   const dexieState = {
@@ -186,7 +160,6 @@ export function DexieProvider(props: ParentProps) {
     addTodo,
     deleteTodo,
     updateTodo,
-    handleTodoCheck,
     addList,
     chooseList,
     deleteList,
