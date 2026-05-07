@@ -34,6 +34,8 @@ export type Todo = {
   dominoIndex?: number;
 };
 
+export type TodoUpdates = Partial<Omit<Todo, "id">>;
+
 export type TodoList = List & {
   todos: Todo[];
 };

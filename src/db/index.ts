@@ -1,4 +1,4 @@
-export { db, type TodosDBTransaction } from "./db";
+export { db, type TodosDBTransaction, type BulkTodoUpdatesArray } from "./db";
 export {
   getTodosWhereKey,
   sortTodosByKey,
