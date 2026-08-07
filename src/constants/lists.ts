@@ -2,9 +2,14 @@ import { z } from "zod/v4";
 import type { IconKey } from "./icons";
 import type { PickerColor } from "./colors";
 
-export const READONLY_LIST_NAMES = ["completed", "todomino", "today"] as const;
+export const READONLY_LIST_NAMES = [
+  "Completed",
+  "Todomino",
+  "Today",
+  "Tomorrow",
+] as const;
 
-export const MAIN_LIST_NAMES = ["reminders"] as const;
+export const MAIN_LIST_NAMES = ["Reminders"] as const;
 
 export const INITIAL_LIST_NAMES = [
   ...READONLY_LIST_NAMES,
@@ -33,29 +38,36 @@ export const LIST_UNION = z.union([
 ]);
 
 export const INITIAL_LISTS_MAP: Record<ListName, List> = {
-  completed: {
-    name: "completed",
+  Completed: {
+    name: "Completed",
     icon: "CHECK",
     color: "SLATE_GREY",
     createdAt: Date.now(),
     updatedAt: Date.now(),
   },
-  reminders: {
-    name: "reminders",
+  Reminders: {
+    name: "Reminders",
     icon: "DATABASE",
     color: "YELLOW",
     createdAt: Date.now(),
     updatedAt: Date.now(),
   },
-  today: {
-    name: "today",
+  Today: {
+    name: "Today",
     icon: "CLOCK",
     color: "BLUE",
     createdAt: Date.now(),
     updatedAt: Date.now(),
   },
-  todomino: {
-    name: "todomino",
+  Tomorrow: {
+    name: "Tomorrow",
+    icon: "CALENDAR",
+    color: "BLUE",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  },
+  Todomino: {
+    name: "Todomino",
     icon: "BOX",
     color: "PURPLE",
     createdAt: Date.now(),
