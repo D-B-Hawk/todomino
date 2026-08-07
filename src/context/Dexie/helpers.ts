@@ -5,6 +5,7 @@ import {
 } from "@/db";
 import { type ListName, type Todo } from "@/types";
 import { hasTodominoIndex } from "@/helpers";
+import dayjs from "dayjs";
 
 // use this for the todo list hydration in dexie
 export function getTodosCollectionByListName(listName: ListName) {
@@ -16,6 +17,11 @@ export function getTodosCollectionByListName(listName: ListName) {
   }
   if (listName === "today") {
     return getTodosWhereKey("dueDate").belowOrEqual(Date.now());
+  }
+  if (listName === "tomorrow") {
+    return getTodosWhereKey("dueDate")
+      .notEqual("")
+      .filter((todo) => dayjs(todo.dueDate).isTomorrow());
   }
 
   return getTodosWhereKey("list").equals(listName);
