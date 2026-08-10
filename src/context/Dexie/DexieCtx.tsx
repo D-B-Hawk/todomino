@@ -19,11 +19,11 @@ import {
   hasTodominoIndex,
   isConstantListName,
 } from "@/helpers";
-import { db } from "@/db";
-import { type List, type ListName, type Todo } from "@/types";
+import { db, type BulkTodoUpdate } from "@/db";
+import { type List, type ListName, type Todo, type TodoUpdates } from "@/types";
 import {
   getTodosCollectionByListName,
-  handleTodominoTodoIndexes,
+  reIndexTodominoIndexes,
 } from "./helpers";
 
 type DexCtx = [
@@ -37,7 +37,11 @@ type DexCtx = [
   {
     addTodo: (todo: Todo) => Promise<string>;
     deleteTodo: (todo: Todo) => Promise<void>;
-    updateTodo: (todo: Todo) => Promise<void>;
+    updateTodo: (todoID: Todo["id"], updates: TodoUpdates) => Promise<number>;
+    bulkUpdateTodos: (
+      updateInfo: BulkTodoUpdate[],
+      todoWithDominoIndex?: boolean,
+    ) => Promise<number>;
     addList: (args: CreateListArgs) => Promise<void>;
     chooseList: (newList: List) => void;
     deleteList: (listName: ListName) => Promise<void>;
@@ -125,8 +129,8 @@ export function DexieProvider(props: ParentProps) {
     return db.todos.delete(todo.id);
   }
 
-  async function updateTodo(updatedTodo: Todo) {
-    const currentTodo = await db.todos.get(updatedTodo.id);
+  async function updateTodo(todoID: Todo["id"], updates: TodoUpdates) {
+    const currentTodo = await db.todos.get(todoID);
     if (currentTodo) {
       // if the current todo had a todomino index and the updated one does not. shift all the
       // todos in the todomino list that have a higher index down one.
@@ -134,18 +138,30 @@ export function DexieProvider(props: ParentProps) {
       return db.transaction("rw", db.todos, async (tx) => {
         if (
           hasTodominoIndex(currentTodo) &&
-          updatedTodo.dominoIndex === undefined
+          updates.dominoIndex === undefined
         ) {
-          await handleTodominoTodoIndexes(tx, currentTodo);
+          await reIndexTodominoIndexes(tx);
         }
 
-        tx.todos.update(updatedTodo, {
-          ...updatedTodo,
-        });
+        return tx.todos.update(todoID, updates);
       });
     }
 
-    throw Error(`Todo with id: ${updatedTodo.id} not found`);
+    throw Error(`Todo with id: ${todoID} not found`);
+  }
+
+  async function bulkUpdateTodos(
+    updateInfo: BulkTodoUpdate[],
+    todoWithDominoIndex?: boolean,
+  ) {
+    return db.transaction("rw", db.todos, async (tx) => {
+      const updateCount = await tx.todos.bulkUpdate(updateInfo);
+      // if there was a todo with a dominoIndex we will re index that list
+      if (todoWithDominoIndex) {
+        await reIndexTodominoIndexes(tx);
+      }
+      return updateCount;
+    });
   }
 
   const dexieState = {
@@ -160,6 +176,7 @@ export function DexieProvider(props: ParentProps) {
     addTodo,
     deleteTodo,
     updateTodo,
+    bulkUpdateTodos,
     addList,
     chooseList,
     deleteList,
