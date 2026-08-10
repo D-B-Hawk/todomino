@@ -1,10 +1,10 @@
 import {
   getTodosWhereKey,
   sortTodosByKey,
+  type BulkTodoUpdate,
   type TodosDBTransaction,
 } from "@/db";
-import { type ListName, type Todo } from "@/types";
-import { hasTodominoIndex } from "@/helpers";
+import { type ListName } from "@/types";
 import dayjs from "dayjs";
 
 // use this for the todo list hydration in dexie
@@ -27,33 +27,23 @@ export function getTodosCollectionByListName(listName: ListName) {
   return getTodosWhereKey("list").equals(listName);
 }
 
-export async function handleTodominoTodoIndexes(
-  tx: TodosDBTransaction,
-  currentTodo: Todo,
-) {
+export async function reIndexTodominoIndexes(tx: TodosDBTransaction) {
   // if the current todo had a todomino index and the updated one does not. shift all the
   // todos in the todomino that have a higher index down one.
 
   const currentTodominoTodos = getTodosCollectionByListName("todomino");
 
-  const sortedTodos = (
-    await sortTodosByKey("dominoIndex", currentTodominoTodos)
-  ).filter((todo) => {
-    if (hasTodominoIndex(todo) && hasTodominoIndex(currentTodo)) {
-      return todo.dominoIndex > currentTodo.dominoIndex;
-    }
-  });
+  const sortedTodos = await sortTodosByKey("dominoIndex", currentTodominoTodos);
 
-  sortedTodos.forEach(async (todo) => {
-    let updatedIndex = todo.dominoIndex;
-    if (updatedIndex !== undefined) {
-      updatedIndex -= 1;
-    }
+  // will just use the index from map to re index the todomino list
+  const transformedForBulkUpdatesTodos = sortedTodos.map<BulkTodoUpdate>(
+    (todo, curIndex) => ({
+      key: todo.id,
+      changes: {
+        dominoIndex: curIndex,
+      },
+    }),
+  );
 
-    await tx.todos.update(todo, {
-      ...todo,
-      updatedAt: Date.now(),
-      dominoIndex: updatedIndex,
-    });
-  });
+  return tx.todos.bulkUpdate(transformedForBulkUpdatesTodos);
 }
