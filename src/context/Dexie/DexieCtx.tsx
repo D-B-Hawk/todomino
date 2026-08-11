@@ -136,6 +136,8 @@ export function DexieProvider(props: ParentProps) {
       // todos in the todomino list that have a higher index down one.
 
       return db.transaction("rw", db.todos, async (tx) => {
+        const update = await tx.todos.update(todoID, updates);
+
         if (
           hasTodominoIndex(currentTodo) &&
           updates.dominoIndex === undefined
@@ -143,7 +145,7 @@ export function DexieProvider(props: ParentProps) {
           await reIndexTodominoIndexes(tx);
         }
 
-        return tx.todos.update(todoID, updates);
+        return update;
       });
     }
 

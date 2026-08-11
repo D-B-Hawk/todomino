@@ -28,9 +28,6 @@ export function getTodosCollectionByListName(listName: ListName) {
 }
 
 export async function reIndexTodominoIndexes(tx: TodosDBTransaction) {
-  // if the current todo had a todomino index and the updated one does not. shift all the
-  // todos in the todomino that have a higher index down one.
-
   const currentTodominoTodos = getTodosCollectionByListName("todomino");
 
   const sortedTodos = await sortTodosByKey("dominoIndex", currentTodominoTodos);
