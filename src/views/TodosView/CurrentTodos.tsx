@@ -1,4 +1,11 @@
-import { createEffect, createSignal, For, on, Show } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  For,
+  on,
+  Show,
+  type Accessor,
+} from "solid-js";
 import debounce from "lodash.debounce";
 import { useDexieCtx } from "@/context";
 import { TodoComp } from "@/components";
@@ -151,47 +158,42 @@ export function CurrentTodos(props: CurrentTodosProps) {
 
     setEditedTodo({ ...todoToEdit, dominoIndex: nextDominoIndex });
   };
-  // TODO: Make func to keep repeat DRY
+
+  const ListOfTodos = (
+    todos: Accessor<Todo[]>,
+    showTodos: Accessor<boolean>,
+  ) => (
+    <Show when={showTodos()}>
+      <For each={todos()}>
+        {(todo) => (
+          <TodoComp
+            todo={todo}
+            onCheck={(checked) => handleCheck(checked, todo)}
+            onDelete={() => deleteTodo(todo)}
+            onUpdateDescription={(description) =>
+              setEditedTodo({ ...todo, description })
+            }
+            onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
+            onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
+            onClickOutside={() => handleClickOutside(todo)}
+            showListPicker={showListPicker()}
+            onUpdateTodomino={() => handleUpdateTodomino(todo)}
+          />
+        )}
+      </For>
+    </Show>
+  );
+
+  const InCompleteTodos = () =>
+    ListOfTodos(chosenListIncompleteTodos, showIncompleteTodos);
+
+  const CompleteTodos = () =>
+    ListOfTodos(chosenListCompleteTodos, showCompletedTodos);
+
   return (
     <>
-      <Show when={showIncompleteTodos()}>
-        <For each={chosenListIncompleteTodos()}>
-          {(todo) => (
-            <TodoComp
-              todo={todo}
-              onCheck={(checked) => handleCheck(checked, todo)}
-              onDelete={() => deleteTodo(todo)}
-              onUpdateDescription={(description) =>
-                setEditedTodo({ ...todo, description })
-              }
-              onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
-              onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
-              onClickOutside={() => handleClickOutside(todo)}
-              showListPicker={showListPicker()}
-              onUpdateTodomino={() => handleUpdateTodomino(todo)}
-            />
-          )}
-        </For>
-      </Show>
-      <Show when={showCompletedTodos()}>
-        <For each={chosenListCompleteTodos()}>
-          {(todo) => (
-            <TodoComp
-              todo={todo}
-              onCheck={(checked) => handleCheck(checked, todo)}
-              onDelete={() => deleteTodo(todo)}
-              onUpdateDescription={(description) =>
-                setEditedTodo({ ...todo, description })
-              }
-              onUpdateDueDate={(dueDate) => setEditedTodo({ ...todo, dueDate })}
-              onUpdateListName={(list) => setEditedTodo({ ...todo, list })}
-              onClickOutside={() => handleClickOutside(todo)}
-              showListPicker={showListPicker()}
-              onUpdateTodomino={() => handleUpdateTodomino(todo)}
-            />
-          )}
-        </For>
-      </Show>
+      <InCompleteTodos />
+      <CompleteTodos />
     </>
   );
 }
