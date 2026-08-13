@@ -16,8 +16,10 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@types/lodash.debounce": "^4.0.9",
     "dayjs": "^1.11.13",
     "dexie": "^4.0.11",
+    "lodash.debounce": "^4.0.8",
     "solid-js": "^1.9.5",
     "solid-transition-group": "^0.3.0",
     "tailwind-merge": "^3.3.0",

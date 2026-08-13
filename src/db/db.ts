@@ -14,6 +14,8 @@ export type TodosDBTransaction = Transaction & TodosDBTable;
 
 export const db = new Dexie("TodosDB") as Dexie & TodosDBTable;
 
+export type BulkTodoUpdate = Parameters<typeof db.todos.bulkUpdate>[0][0];
+
 const TODO_KEY_MAP: Record<keyof Todo, keyof Todo> = {
   id: "id",
   list: "list",

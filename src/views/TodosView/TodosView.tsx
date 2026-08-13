@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createSignal, on, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import type { ListName, Todo } from "@/types";
 import { useDexieCtx } from "@/context";
@@ -22,8 +22,10 @@ import { CurrentTodos } from "./CurrentTodos";
 import { INITIAL_LIST_NAMES } from "@/constants/lists";
 
 export function TodosView() {
-  const [{ lists, chosenList, listsIncompleteTodosCount }, { addTodo }] =
-    useDexieCtx();
+  const [
+    { lists, chosenList, chosenListCompleteTodos, listsIncompleteTodosCount },
+    { addTodo },
+  ] = useDexieCtx();
 
   const [showCompletedTodos, { toggle }, setShowCompletedTodos] = useToggle();
 
@@ -32,12 +34,39 @@ export function TodosView() {
   const [newTodo, setNewTodo] = createSignal<Todo>();
 
   // every time a different list is chosen make sure we
-  // are not showing the completed todos if they toggled that
-  // option on before
-  createEffect(() => {
-    chosenList();
-    setShowCompletedTodos(false);
-  });
+  // are only showing incomplete todos by default
+  createEffect(
+    on(
+      chosenList,
+      (list, prevList) => {
+        if (prevList && list !== prevList && showCompletedTodos()) {
+          setShowCompletedTodos(false);
+        }
+      },
+      { defer: true },
+    ),
+  );
+
+  // if there are completed todos that are checked off as incomplete
+  // make sure the setShowCompleted is turned off. If left turned on the
+  // behavior is to make the newly checked off todos update immediately.
+  // instead of the default behavior of delaying the update for 2 seconds
+  // in case they change their mind, made a mistake, checking off multiple, etc.
+  /**
+   * See {@link CurrentTodos} => handleCheck
+   */
+
+  createEffect(
+    on(
+      chosenListCompleteTodos,
+      (completeTodos, prevCompleteTodos) => {
+        if (prevCompleteTodos && !completeTodos.length) {
+          setShowCompletedTodos(false);
+        }
+      },
+      { defer: true },
+    ),
+  );
 
   function handleCreateTodo() {
     const freshTodo = newTodo();
